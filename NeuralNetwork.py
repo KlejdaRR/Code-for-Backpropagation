@@ -4,7 +4,7 @@ from modules.Activation import Sigmoid
 class NeuralNetwork:
     def __init__(self, layers):
         self.layers = layers
-        self.sigmoid = Sigmoid()  # Use the Sigmoid class from the new activation system
+        self.sigmoid = Sigmoid()
 
     def forward(self, X):
         A = []
@@ -18,18 +18,17 @@ class NeuralNetwork:
         return X, A, O
 
     def loss(self, y_true, y_pred):
-        y_pred = np.clip(y_pred, 1e-12, 1.0)  # Avoid log(0) issues
+        y_pred = np.clip(y_pred, 1e-12, 1.0)
         return -np.mean(y_true * np.log(y_pred))
 
     def backward(self, X, y_true, y_pred, A, O):
         """Computing gradients using backpropagation."""
         L = len(self.layers)
         G = [None] * L
-        d_loss = y_pred - y_true  # Derivative of cross-entropy with softmax
+        d_loss = y_pred - y_true
 
         for l in range(L - 1, -1, -1):
             if l == L - 1:
-                # Use the Sigmoid activation object's derivative method
                 Delta = self.sigmoid.derivative(A[l]) * d_loss
             else:
                 Wl_plus_1 = self.layers[l + 1].weights
