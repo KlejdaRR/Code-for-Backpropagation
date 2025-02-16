@@ -57,7 +57,8 @@ if __name__ == "__main__":
     input_size = 784 if dataset_name == "mnist" else 32 * 32 * 3  # MNIST (28x28), CIFAR-10 (32x32x3)
 
     nn = NeuralNetwork([
-        DenseLayer(input_size, 256, activation="relu", initialization="he"),
+        DenseLayer(input_size, 512, activation="relu", initialization="he"),
+        DenseLayer(512, 256, activation="relu", initialization="he"),
         DenseLayer(256, 128, activation="relu", initialization="he"),
         DenseLayer(128, 10, activation="softmax", initialization="xavier")
     ])
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     y_train, y_val, y_test = y_train.T, y_val.T, y_test.T
 
     train_losses, val_losses, train_accuracies, val_accuracies = nn.train(
-        X_train, y_train, X_val, y_val, epochs=50, learning_rate=0.01, batch_size=64
+        X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128
     )
 
     plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name)

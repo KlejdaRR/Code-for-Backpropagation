@@ -21,7 +21,7 @@ class NeuralNetwork:
         y_pred = np.clip(y_pred, 1e-12, 1.0)
         return -np.mean(y_true * np.log(y_pred))
 
-    def backward(self, X, y_true, y_pred, A, O, learning_rate):
+    def backward(self, X, y_true, y_pred, A, O, learning_rate, lambda_reg=0.01):
         """Computing gradients using backpropagation and updating weights with learning rate."""
         L = len(self.layers)
         G = [None] * L
@@ -43,13 +43,13 @@ class NeuralNetwork:
 
             G[l] = (Wl_grad, bl_grad)
 
-
         for l in range(L):
             W_grad, b_grad = G[l]
-            self.layers[l].weights -= learning_rate * W_grad
+            self.layers[l].weights -= learning_rate * (
+                        W_grad + lambda_reg * self.layers[l].weights)  # L2 Regularization
             self.layers[l].biases -= learning_rate * b_grad
 
-    def train(self, X_train, y_train, X_val, y_val, epochs=50, learning_rate=0.001, batch_size=64, patience=10):
+    def train(self, X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=20):
         train_losses, val_losses = [], []
         train_accuracies, val_accuracies = [], []
 
