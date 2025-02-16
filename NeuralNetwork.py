@@ -1,14 +1,10 @@
 import numpy as np
-
-def sigmoid(x, compute_derivative=False):
-    sig = 1 / (1 + np.exp(-x))
-    if compute_derivative:
-        return sig * (1 - sig)
-    return sig
+from modules.Activation import Sigmoid
 
 class NeuralNetwork:
     def __init__(self, layers):
         self.layers = layers
+        self.sigmoid = Sigmoid()  # Use the Sigmoid class from the new activation system
 
     def forward(self, X):
         A = []
@@ -22,21 +18,22 @@ class NeuralNetwork:
         return X, A, O
 
     def loss(self, y_true, y_pred):
-        y_pred = np.clip(y_pred, 1e-12, 1.0)
+        y_pred = np.clip(y_pred, 1e-12, 1.0)  # Avoid log(0) issues
         return -np.mean(y_true * np.log(y_pred))
 
     def backward(self, X, y_true, y_pred, A, O):
-        """Computing of  gradients using backpropagation."""
+        """Computing gradients using backpropagation."""
         L = len(self.layers)
         G = [None] * L
-        d_loss = y_pred - y_true
+        d_loss = y_pred - y_true  # Derivative of cross-entropy with softmax
 
         for l in range(L - 1, -1, -1):
             if l == L - 1:
-                Delta = sigmoid(A[l], compute_derivative=True) * d_loss
+                # Use the Sigmoid activation object's derivative method
+                Delta = self.sigmoid.derivative(A[l]) * d_loss
             else:
                 Wl_plus_1 = self.layers[l + 1].weights
-                Delta = sigmoid(A[l], compute_derivative=True) * np.matmul(Wl_plus_1.T, Delta)
+                Delta = self.sigmoid.derivative(A[l]) * np.matmul(Wl_plus_1.T, Delta)
 
             if l > 0:
                 Wl_grad = np.matmul(Delta, O[l - 1].T)

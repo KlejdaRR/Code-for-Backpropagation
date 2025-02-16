@@ -1,11 +1,19 @@
 from modules.BaseLayer import BaseLayer
-from modules.ActivationFunction import ActivationFunction
+from modules.Activation import ReLU, Softmax, Sigmoid
 import numpy as np
 
 class DenseLayer(BaseLayer):
     def __init__(self, input_size, output_size, activation="relu", initialization="he"):
-        self.activation_func = ActivationFunction(activation)
-        self.activation_derivative = getattr(self, f"derivative_{activation}", None)
+        activation_classes = {
+            "relu": ReLU,
+            "sigmoid": Sigmoid,
+            "softmax": Softmax
+        }
+
+        if activation not in activation_classes:
+            raise ValueError(f"Unsupported activation function: {activation}")
+
+        self.activation = activation_classes[activation]()
 
         if initialization == "xavier":
             self.weights = np.random.randn(output_size, input_size) * np.sqrt(1 / input_size)
@@ -19,12 +27,11 @@ class DenseLayer(BaseLayer):
     def forward(self, X):
         self.input = X
         self.pre_activation = np.dot(self.weights, X) + self.biases
-        self.output = self.activation_func(self.pre_activation)
+        self.output = self.activation.forward(self.pre_activation)
         return self.output
 
     def backward(self, d_output, learning_rate):
-        if self.activation_derivative:
-            d_output *= self.activation_derivative(self.pre_activation)
+        d_output *= self.activation.derivative(self.pre_activation)
 
         d_weights = np.dot(d_output, self.input.T) / self.input.shape[1]
         d_biases = np.mean(d_output, axis=1, keepdims=True)
