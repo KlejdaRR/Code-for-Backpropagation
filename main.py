@@ -24,31 +24,27 @@ def load_mnist_data(file_path):
 
     return X.T, y_one_hot
 
-
 if __name__ == "__main__":
     np.random.seed(0)
 
-    X_train = np.random.rand(10, 500)
-    y_train = (np.sum(X_train, axis=0) > 5).astype(int).reshape(1, -1)
+    train_file = "data/mnist_train.csv"
+    test_file = "data/mnist_test.csv"
+    X_train, y_train = load_mnist_data(train_file)
+    X_test, y_test = load_mnist_data(test_file)
 
-    X_val = np.random.rand(10, 100)
-    y_val = (np.sum(X_val, axis=0) > 5).astype(int).reshape(1, -1)
-
-    X_test = np.random.rand(10, 100)
-    y_test = (np.sum(X_test, axis=0) > 5).astype(int).reshape(1, -1)
+    val_ratio = 0.1
+    val_size = int(X_train.shape[1] * val_ratio)
+    X_val, y_val = X_train[:, :val_size], y_train[:, :val_size]
+    X_train, y_train = X_train[:, val_size:], y_train[:, val_size:]
 
     nn = NeuralNetwork([
-        DenseLayer(10, 5),
-        DenseLayer(5, 1)
+        DenseLayer(784, 128, activation="relu", initialization="he"),
+        DenseLayer(128, 64, activation="relu", initialization="he"),
+        DenseLayer(64, 10, activation="softmax", initialization="xavier")
     ])
 
-    train_losses, val_losses = nn.train(X_train, y_train, X_val, y_val, epochs=1000, learning_rate=0.1)
+    train_losses, val_losses = nn.train(X_train, y_train, X_val, y_val, epochs=50, learning_rate=0.01, batch_size=64)
+
+    plot_results(train_losses, val_losses)
 
     nn.evaluate(X_test, y_test)
-
-    plt.plot(train_losses, label='Training Loss')
-    plt.plot(val_losses, label='Validation Loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.show()
