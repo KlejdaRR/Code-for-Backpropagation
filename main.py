@@ -1,6 +1,7 @@
 import numpy as np
 from NeuralNetwork import NeuralNetwork
 from modules.DenseLayer import DenseLayer
+from utils.DatasetLoader import DatasetLoader
 import matplotlib.pyplot as plt
 
 
@@ -29,13 +30,9 @@ if __name__ == "__main__":
 
     train_file = "data/mnist_train.csv"
     test_file = "data/mnist_test.csv"
-    X_train, y_train = load_mnist_data(train_file)
-    X_test, y_test = load_mnist_data(test_file)
 
-    val_ratio = 0.1
-    val_size = int(X_train.shape[1] * val_ratio)
-    X_val, y_val = X_train[:, :val_size], y_train[:, :val_size]
-    X_train, y_train = X_train[:, val_size:], y_train[:, val_size:]
+    dataset_loader = DatasetLoader(dataset_type="mnist")
+    X_train, y_train, X_val, y_val, X_test, y_test = dataset_loader.load_data(train_file, test_file)
 
     nn = NeuralNetwork([
         DenseLayer(784, 128, activation="relu", initialization="he"),
@@ -46,5 +43,4 @@ if __name__ == "__main__":
     train_losses, val_losses = nn.train(X_train, y_train, X_val, y_val, epochs=50, learning_rate=0.01, batch_size=64)
 
     plot_results(train_losses, val_losses)
-
     nn.evaluate(X_test, y_test)
