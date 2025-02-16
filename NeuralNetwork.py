@@ -21,8 +21,8 @@ class NeuralNetwork:
         y_pred = np.clip(y_pred, 1e-12, 1.0)
         return -np.mean(y_true * np.log(y_pred))
 
-    def backward(self, X, y_true, y_pred, A, O):
-        """Computing gradients using backpropagation."""
+    def backward(self, X, y_true, y_pred, A, O, learning_rate):
+        """Computing gradients using backpropagation and updating weights with learning rate."""
         L = len(self.layers)
         G = [None] * L
         d_loss = y_pred - y_true
@@ -43,13 +43,16 @@ class NeuralNetwork:
 
             G[l] = (Wl_grad, bl_grad)
 
+
         for l in range(L):
             W_grad, b_grad = G[l]
-            self.layers[l].weights -= 0.001 * W_grad
-            self.layers[l].biases -= 0.001 * b_grad
+            self.layers[l].weights -= learning_rate * W_grad
+            self.layers[l].biases -= learning_rate * b_grad
 
     def train(self, X_train, y_train, X_val, y_val, epochs=50, learning_rate=0.001, batch_size=64, patience=10):
         train_losses, val_losses = [], []
+        train_accuracies, val_accuracies = [], []
+
         best_val_loss = float('inf')
         no_improve_count = 0
 
@@ -62,17 +65,26 @@ class NeuralNetwork:
             for i in range(0, num_samples, batch_size):
                 X_batch = X_train[:, i:i + batch_size]
                 y_batch = y_train[:, i:i + batch_size]
-
                 y_pred, A, O = self.forward(X_batch)
-                self.backward(X_batch, y_batch, y_pred, A, O)
 
-            train_loss = self.loss(y_train, self.forward(X_train)[0])
-            val_loss = self.loss(y_val, self.forward(X_val)[0])
+                self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
+
+            y_train_pred = self.forward(X_train)[0]
+            y_val_pred = self.forward(X_val)[0]
+
+            train_loss = self.loss(y_train, y_train_pred)
+            val_loss = self.loss(y_val, y_val_pred)
+
+            train_accuracy = np.mean(np.argmax(y_train_pred, axis=0) == np.argmax(y_train, axis=0)) * 100
+            val_accuracy = np.mean(np.argmax(y_val_pred, axis=0) == np.argmax(y_val, axis=0)) * 100
 
             train_losses.append(train_loss)
             val_losses.append(val_loss)
+            train_accuracies.append(train_accuracy)
+            val_accuracies.append(val_accuracy)
 
-            print(f"Epoch {epoch + 1}: Train Loss = {train_loss:.4f}, Val Loss = {val_loss:.4f}")
+            print(f"Epoch {epoch + 1}: Train Loss = {train_loss:.4f}, Val Loss = {val_loss:.4f}, "
+                  f"Train Acc = {train_accuracy:.2f}%, Val Acc = {val_accuracy:.2f}%")
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
@@ -84,7 +96,7 @@ class NeuralNetwork:
                 print("Early stopping triggered!")
                 break
 
-        return train_losses, val_losses
+        return train_losses, val_losses, train_accuracies, val_accuracies
 
     def evaluate(self, X_test, y_test):
         y_pred = self.forward(X_test)[0]

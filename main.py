@@ -5,13 +5,27 @@ from utils.DatasetLoader import DatasetLoader
 from modules.DenseLayer import DenseLayer
 from NeuralNetwork import NeuralNetwork
 
-def plot_results(train_losses, val_losses, dataset_name):
-    plt.plot(train_losses, label='Training Loss')
-    plt.plot(val_losses, label='Validation Loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.title(f"Training Loss vs Validation Loss ({dataset_name.upper()})")
+
+def plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name):
+    fig, ax1 = plt.subplots(2, 1, figsize=(10, 8))
+
+    # Loss Plot
+    ax1[0].plot(train_losses, label='Training Loss', color='blue')
+    ax1[0].plot(val_losses, label='Validation Loss', color='orange')
+    ax1[0].set_xlabel('Epochs')
+    ax1[0].set_ylabel('Loss')
+    ax1[0].set_title(f"Training vs Validation Loss ({dataset_name.upper()})")
+    ax1[0].legend()
+
+    # Accuracy Plot
+    ax1[1].plot(train_accuracies, label='Training Accuracy', color='green')
+    ax1[1].plot(val_accuracies, label='Validation Accuracy', color='red')
+    ax1[1].set_xlabel('Epochs')
+    ax1[1].set_ylabel('Accuracy (%)')
+    ax1[1].set_title(f"Training vs Validation Accuracy ({dataset_name.upper()})")
+    ax1[1].legend()
+
+    plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
@@ -57,8 +71,10 @@ if __name__ == "__main__":
 
     y_train, y_val, y_test = y_train.T, y_val.T, y_test.T
 
-    train_losses, val_losses = nn.train(X_train, y_train, X_val, y_val, epochs=50, learning_rate=0.01, batch_size=64)
+    train_losses, val_losses, train_accuracies, val_accuracies = nn.train(
+        X_train, y_train, X_val, y_val, epochs=50, learning_rate=0.01, batch_size=64
+    )
 
-    plot_results(train_losses, val_losses, dataset_name)
+    plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name)
 
     nn.evaluate(X_test, y_test)
