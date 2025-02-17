@@ -30,13 +30,27 @@ class DenseLayer(BaseLayer):
         self.output = self.activation.forward(self.pre_activation)
         return self.output
 
-    def backward(self, d_output, learning_rate):
-        d_output *= self.activation.derivative(self.pre_activation)
+    def backward(self, d_output, Z, input_data, learning_rate):
+        if d_output.shape[0] != self.weights.shape[0]:
+            d_output = d_output.T
 
-        d_weights = np.dot(d_output, self.input.T) / self.input.shape[1]
+        if Z.shape[0] != self.weights.shape[0]:
+            Z = Z.T
+
+        d_output *= self.activation.derivative(Z)
+
+        if input_data.shape[0] != self.weights.shape[1]:
+            input_data = input_data.T
+
+        if input_data.shape[0] != self.weights.shape[1]:
+            raise ValueError(
+                f"Layer mismatch: input_data {input_data.shape} does not match expected input size {self.weights.shape[1]}"
+            )
+
+        d_weights = np.dot(d_output, input_data.T) / input_data.shape[1]
         d_biases = np.mean(d_output, axis=1, keepdims=True)
         d_input = np.dot(self.weights.T, d_output)
-
         self.weights -= learning_rate * d_weights
         self.biases -= learning_rate * d_biases
+
         return d_input

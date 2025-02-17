@@ -8,50 +8,44 @@ class NeuralNetwork:
         self.sigmoid = Sigmoid()
 
     def forward(self, X):
-        A = X
-        pre_activations = []
-        activations = [A]
+        A = [X]
+        Z = []
+        current_input = X
 
         for layer in self.layers:
-            Z = np.dot(layer.weights, A) + layer.biases
-            A = layer.activation.forward(Z)
+            Z_current = np.dot(layer.weights, current_input) + layer.biases
+            Z.append(Z_current)
+            A_current = layer.activation.forward(Z_current)
 
-            pre_activations.append(Z)
-            activations.append(A)
+            if A_current.shape[0] != layer.weights.shape[0]:
+                raise ValueError(
+                    f"Layer mismatch: A_current shape {A_current.shape} does not match expected {layer.weights.shape[0]}.")
 
-        return activations[-1], pre_activations, activations
+            A.append(A_current)
+            current_input = A_current
+
+        return A[-1], A, Z
 
     def loss(self, y_true, y_pred):
         y_pred = np.clip(y_pred, 1e-12, 1.0)
         return -np.mean(y_true * np.log(y_pred))
 
-    def backward(self, X, y_true, y_pred, A, O, learning_rate, lambda_reg=0.01):
+    def backward(self, X, y_true, y_pred, A, Z, learning_rate, lambda_reg=0.01):
         """Computing gradients using backpropagation and updating weights with learning rate."""
         L = len(self.layers)
-        G = [None] * L
         d_loss = y_pred - y_true
+        d_output = d_loss
 
         for l in range(L - 1, -1, -1):
-            if l == L - 1:
-                Delta = d_loss
-            else:
-                Wl_plus_1 = self.layers[l + 1].weights
-                Delta = np.dot(Wl_plus_1.T, Delta) * self.layers[l].activation.derivative(A[l])
+            input_data = A[l] if l > 0 else X
 
-            if l > 0:
-                Wl_grad = np.dot(Delta, O[l].T) / O[l].shape[1]
-            else:
-                Wl_grad = np.dot(Delta, X.T) / X.shape[1]
+            if input_data.shape[0] != self.layers[l].weights.shape[1]:
+                input_data = input_data.T
 
-            bl_grad = np.mean(Delta, axis=1, keepdims=True)
+            if d_output.shape[0] != self.layers[l].weights.shape[0]:
+                d_output = d_output.T
 
-            G[l] = (Wl_grad, bl_grad)
-
-        for l in range(L):
-            W_grad, b_grad = G[l]
-            self.layers[l].weights -= learning_rate * (
-                        W_grad + lambda_reg * self.layers[l].weights)  # L2 Regularization
-            self.layers[l].biases -= learning_rate * b_grad
+            d_output = self.layers[l].backward(d_output, Z[l], input_data, learning_rate)
 
     def train(self, X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=10):
         """Training the neural network with early stopping and loss plateau detection."""

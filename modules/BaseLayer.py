@@ -4,5 +4,5 @@ class BaseLayer:
     def forward(self, X):
         raise NotImplementedError
 
-    def backward(self, d_output, learning_rate):
+    def backward(self, d_output, Z, input_data, learning_rate):
         raise NotImplementedError
