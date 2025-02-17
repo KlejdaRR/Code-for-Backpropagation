@@ -11,24 +11,24 @@ Code-for-Backpropagation/
 │   │── mnist_train.csv
 │── cifar-10-python/
 │── modules/
-│   │── Activation.py
-│   │── BaseLayer.py
+│   │── Activation.py       # Activation functions (ReLU, Sigmoid, Softmax)
+│   │── BaseLayer.py        # Base class for layers
 │   │── DenseLayer.py       # Fully connected layer implementation
 │── utils/
-│   │── DatasetLoader.py
-│   │── StopCriterion.py
+│   │── DatasetLoader.py    # Handles dataset loading (MNIST, CIFAR-10)
+│   │── StopCriterion.py    # Early stopping and loss plateau detection
 │── NeuralNetwork.py        # Neural network model
-│── main.py                  # Training and evaluation script
-│── README.txt                # Project documentation
+│── main.py                 # Training and evaluation script
+│── README.txt              # Project documentation
 ```
 
 ## Features
-- Modular implementation using **BaseLayer** and **DenseLayer**
-- Forward and backward propagation with **sigmoid activation**
-- Mean Squared Error (MSE) as loss function
-- Training with **early stopping** based on validation loss
-- Synthetic dataset for binary classification
-- Loss visualization using **Matplotlib**
+- Fully connected layers with configurable activation functions
+- Activation functions: ReLU, Sigmoid, Softmax
+- Dataset Loader for MNIST and CIFAR-10 datasets
+- Early stopping and loss plateau detection for optimized training
+- Forward and Backward Propagation with gradient descent and L2 regularization
+- Training and Evaluation with visualization of loss and accuracy
 
 ## Usage
 Run the training script with:
@@ -38,9 +38,10 @@ python main.py --dataset cifar10
 ```
 
 ## Dependencies
-- Python 3.9
-- NumPy
-- Matplotlib
+- Python 3.10.11
+- NumPy 2.2.2
+- Pandas 2.2.3
+- Matplotlib  3.10.0
 
 ## Authors
 Klejda Rrapaj: k.rrapaj@student.unisi.it
