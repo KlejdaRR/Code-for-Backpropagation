@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class StopCriterion:
     def __init__(self, criteria, patience=5, loss_window=5):
         """Initializing the stopping criterion."""

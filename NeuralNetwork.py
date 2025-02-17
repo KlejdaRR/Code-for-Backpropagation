@@ -8,15 +8,18 @@ class NeuralNetwork:
         self.sigmoid = Sigmoid()
 
     def forward(self, X):
-        A = []
-        O = []
+        A = X
+        pre_activations = []
+        activations = [A]
 
         for layer in self.layers:
-            X = layer.forward(X)
-            A.append(layer.pre_activation)
-            O.append(X)
+            Z = np.dot(layer.weights, A) + layer.biases
+            A = layer.activation.forward(Z)
 
-        return X, A, O
+            pre_activations.append(Z)
+            activations.append(A)
+
+        return activations[-1], pre_activations, activations
 
     def loss(self, y_true, y_pred):
         y_pred = np.clip(y_pred, 1e-12, 1.0)
@@ -30,17 +33,17 @@ class NeuralNetwork:
 
         for l in range(L - 1, -1, -1):
             if l == L - 1:
-                Delta = self.sigmoid.derivative(A[l]) * d_loss
+                Delta = d_loss
             else:
                 Wl_plus_1 = self.layers[l + 1].weights
-                Delta = self.sigmoid.derivative(A[l]) * np.matmul(Wl_plus_1.T, Delta)
+                Delta = np.dot(Wl_plus_1.T, Delta) * self.layers[l].activation.derivative(A[l])
 
             if l > 0:
-                Wl_grad = np.matmul(Delta, O[l - 1].T)
+                Wl_grad = np.dot(Delta, O[l].T) / O[l].shape[1]
             else:
-                Wl_grad = np.matmul(Delta, X.T)
+                Wl_grad = np.dot(Delta, X.T) / X.shape[1]
 
-            bl_grad = np.sum(Delta, axis=1, keepdims=True)
+            bl_grad = np.mean(Delta, axis=1, keepdims=True)
 
             G[l] = (Wl_grad, bl_grad)
 
@@ -51,9 +54,7 @@ class NeuralNetwork:
             self.layers[l].biases -= learning_rate * b_grad
 
     def train(self, X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=10):
-        """
-        Training the neural network with early stopping and loss plateau detection.
-        """
+        """Training the neural network with early stopping and loss plateau detection."""
         stop_criterion = StopCriterion(criteria=['early_stopping', 'loss_plateau', 'max_epochs'], patience=10,
                                        loss_window=10)
         stop_criterion.set_max_epochs(epochs)
@@ -64,7 +65,7 @@ class NeuralNetwork:
         num_samples = X_train.shape[1]
 
         for epoch in range(epochs):
-            # Shuffle training data
+            # Shuffling of training data
             permutation = np.random.permutation(num_samples)
             X_train, y_train = X_train[:, permutation], y_train[:, permutation]
 
