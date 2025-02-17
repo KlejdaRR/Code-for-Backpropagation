@@ -35,10 +35,8 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, choices=["mnist", "cifar10"], default="mnist",
                         help="Choose dataset to train on (mnist or cifar10).")
     args = parser.parse_args()
-
     dataset_name = args.dataset
     print(f"Loading {dataset_name.upper()} dataset...")
-
     dataset_loader = DatasetLoader(dataset_type=dataset_name)
 
     if dataset_name == "mnist":

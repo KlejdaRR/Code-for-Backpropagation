@@ -54,7 +54,8 @@ class NeuralNetwork:
         """
         Training the neural network with early stopping and loss plateau detection.
         """
-        stop_criterion = StopCriterion(criteria=['early_stopping', 'loss_plateau', 'max_epochs'], patience=patience)
+        stop_criterion = StopCriterion(criteria=['early_stopping', 'loss_plateau', 'max_epochs'], patience=10,
+                                       loss_window=10)
         stop_criterion.set_max_epochs(epochs)
 
         train_losses, val_losses = [], []

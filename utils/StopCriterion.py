@@ -50,13 +50,13 @@ class StopCriterion:
         Checking if the loss plateau criterion is met.
         """
         if len(self.train_losses) < self.loss_window:
-            return False, None, None  # Not enough epochs to check
+            return False, None, None
 
         recent_losses = self.train_losses[-self.loss_window:]
         mean_loss = np.mean(recent_losses)
         std_loss = np.std(recent_losses)
 
-        if std_loss < (mean_loss * 0.001):  # Threshold for plateau
+        if std_loss < (mean_loss * 0.0001):
             return True, 'Loss plateau detected', None
         return False, None, None
 
