@@ -9,13 +9,17 @@ Code-for-Backpropagation/
 │── data/
 │   │── mnist_text.csv
 │   │── mnist_train.csv
+│── cifar-10-python/
 │── modules/
-│   │── BaseLayer.py        # Abstract base layer
-│   │── DenseLayer.py
-│   │── Layer.py            # Fully connected layer implementation
+│   │── Activation.py
+│   │── BaseLayer.py
+│   │── DenseLayer.py       # Fully connected layer implementation
+│── utils/
+│   │── DatasetLoader.py
+│   │── StopCriterion.py
 │── NeuralNetwork.py        # Neural network model
 │── main.py                  # Training and evaluation script
-│── README.md                # Project documentation
+│── README.txt                # Project documentation
 ```
 
 ## Features
@@ -28,8 +32,9 @@ Code-for-Backpropagation/
 
 ## Usage
 Run the training script with:
-```sh
-python main.py
+```
+python main.py --dataset mnist
+python main.py --dataset cifar10
 ```
 
 ## Dependencies

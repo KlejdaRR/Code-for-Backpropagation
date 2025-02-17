@@ -68,7 +68,6 @@ class DatasetLoader:
             X_train = X_train.astype("float32") / 255.0
             X_test = X_test.astype("float32") / 255.0
 
-        # Reshaping the data to 3D image format (32x32x3)
         X_train = X_train.reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
         X_test = X_test.reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
 
@@ -76,7 +75,6 @@ class DatasetLoader:
             y_train = self._one_hot_encode(y_train, num_classes)
             y_test = self._one_hot_encode(y_test, num_classes)
 
-        # Splitting the validation set (10% of training data)
         val_size = int(X_train.shape[0] * 0.1)
         X_val, y_val = X_train[:val_size], y_train[:val_size]
         X_train, y_train = X_train[val_size:], y_train[val_size:]

@@ -3,38 +3,23 @@ import numpy as np
 
 class StopCriterion:
     def __init__(self, criteria, patience=5, loss_window=5):
-        """
-        Initializing the stopping criterion.
-
-        Args:
-            criteria (list): List of stopping criteria to use.
-            patience (int): Number of epochs to wait before stopping if no improvement.
-            loss_window (int): Number of epochs to track for loss plateau detection.
-        """
+        """Initializing the stopping criterion."""
         self.criteria = criteria
         self.max_epochs = None
         self.patience = patience
         self.loss_window = loss_window
-
-        # Early Stopping
         self.best_loss = float('inf')
         self.waited_epochs = 0
         self.best_weights = None
-
-        # Loss Tracking
         self.train_losses = []
         self.val_losses = []
 
     def set_max_epochs(self, max_epochs):
-        """
-        Setting the maximum number of epochs.
-        """
+        """Setting the maximum number of epochs."""
         self.max_epochs = max_epochs
 
     def check_early_stopping(self, val_loss, weights):
-        """
-        Checking if early stopping criterion is met.
-        """
+        """Checking if early stopping criterion is met."""
         if val_loss < self.best_loss:
             self.best_loss = val_loss
             self.waited_epochs = 0
@@ -46,9 +31,7 @@ class StopCriterion:
         return False, None, weights
 
     def check_loss_plateau(self):
-        """
-        Checking if the loss plateau criterion is met.
-        """
+        """Checking if the loss plateau criterion is met."""
         if len(self.train_losses) < self.loss_window:
             return False, None, None
 
@@ -61,17 +44,13 @@ class StopCriterion:
         return False, None, None
 
     def check_max_epochs(self, current_epoch):
-        """
-        Checking if the maximum number of epochs is reached.
-        """
+        """Checking if the maximum number of epochs is reached."""
         if self.max_epochs and current_epoch >= self.max_epochs:
             return True, 'Maximum epochs reached', None
         return False, None, None
 
     def __call__(self, current_epoch, train_loss, val_loss, weights):
-        """
-        Checking all stopping criteria and return whether to stop training.
-        """
+        """Checking all stopping criteria and return whether to stop training."""
         self.train_losses.append(train_loss)
         self.val_losses.append(val_loss)
 

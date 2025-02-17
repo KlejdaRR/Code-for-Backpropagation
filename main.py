@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     input_size = 784 if dataset_name == "mnist" else 32 * 32 * 3  # CIFAR-10 needs 3072
     nn = NeuralNetwork([
-        DenseLayer(input_size, 512, activation="relu", initialization="he"),  # Now correctly set for CIFAR-10
+        DenseLayer(input_size, 512, activation="relu", initialization="he"),
         DenseLayer(512, 256, activation="relu", initialization="he"),
         DenseLayer(256, 128, activation="relu", initialization="he"),
         DenseLayer(128, 10, activation="softmax", initialization="xavier")
