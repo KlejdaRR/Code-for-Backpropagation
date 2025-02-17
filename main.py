@@ -54,17 +54,16 @@ if __name__ == "__main__":
     print(f"Validation Set: {X_val.shape}, {y_val.shape}")
     print(f"Test Set: {X_test.shape}, {y_test.shape}")
 
-    input_size = 784 if dataset_name == "mnist" else 32 * 32 * 3  # MNIST (28x28), CIFAR-10 (32x32x3)
-
+    input_size = 784 if dataset_name == "mnist" else 32 * 32 * 3  # CIFAR-10 needs 3072
     nn = NeuralNetwork([
-        DenseLayer(input_size, 512, activation="relu", initialization="he"),
+        DenseLayer(input_size, 512, activation="relu", initialization="he"),  # Now correctly set for CIFAR-10
         DenseLayer(512, 256, activation="relu", initialization="he"),
         DenseLayer(256, 128, activation="relu", initialization="he"),
         DenseLayer(128, 10, activation="softmax", initialization="xavier")
     ])
 
     if dataset_name == "cifar10":
-        X_train = X_train.reshape(X_train.shape[0], -1).T
+        X_train = X_train.reshape(X_train.shape[0], -1).T  # Reshape to (3072, num_samples)
         X_val = X_val.reshape(X_val.shape[0], -1).T
         X_test = X_test.reshape(X_test.shape[0], -1).T
     else:
@@ -73,7 +72,7 @@ if __name__ == "__main__":
     y_train, y_val, y_test = y_train.T, y_val.T, y_test.T
 
     train_losses, val_losses, train_accuracies, val_accuracies = nn.train(
-        X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128
+        X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=10
     )
 
     plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name)
