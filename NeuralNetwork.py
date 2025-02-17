@@ -52,20 +52,7 @@ class NeuralNetwork:
 
     def train(self, X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=10):
         """
-        Train the neural network with early stopping and loss plateau detection.
-
-        Args:
-            X_train (numpy array): Training data.
-            y_train (numpy array): Training labels.
-            X_val (numpy array): Validation data.
-            y_val (numpy array): Validation labels.
-            epochs (int): Maximum number of epochs.
-            learning_rate (float): Learning rate.
-            batch_size (int): Mini-batch size.
-            patience (int): Number of epochs for early stopping.
-
-        Returns:
-            train_losses, val_losses, train_accuracies, val_accuracies
+        Training the neural network with early stopping and loss plateau detection.
         """
         stop_criterion = StopCriterion(criteria=['early_stopping', 'loss_plateau', 'max_epochs'], patience=patience)
         stop_criterion.set_max_epochs(epochs)
@@ -87,7 +74,6 @@ class NeuralNetwork:
 
                 self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
 
-            # Compute training and validation loss
             y_train_pred = self.forward(X_train)[0]
             y_val_pred = self.forward(X_val)[0]
 
@@ -105,7 +91,7 @@ class NeuralNetwork:
             print(f"Epoch {epoch + 1}: Train Loss = {train_loss:.4f}, Val Loss = {val_loss:.4f}, "
                   f"Train Acc = {train_accuracy:.2f}%, Val Acc = {val_accuracy:.2f}%")
 
-            # Check stopping criterion
+            # Checking stopping criterion
             stop, reason, best_weights = stop_criterion(epoch, train_loss, val_loss, self.layers)
             if stop:
                 print(f"\nTraining stopped at epoch {epoch + 1}: {reason}")

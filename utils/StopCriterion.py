@@ -4,10 +4,10 @@ import numpy as np
 class StopCriterion:
     def __init__(self, criteria, patience=5, loss_window=5):
         """
-        Initialize the stopping criterion.
+        Initializing the stopping criterion.
 
         Args:
-            criteria (list): List of stopping criteria to use. Options: ['max_epochs', 'early_stopping', 'loss_plateau']
+            criteria (list): List of stopping criteria to use.
             patience (int): Number of epochs to wait before stopping if no improvement.
             loss_window (int): Number of epochs to track for loss plateau detection.
         """
@@ -27,13 +27,13 @@ class StopCriterion:
 
     def set_max_epochs(self, max_epochs):
         """
-        Set the maximum number of epochs.
+        Setting the maximum number of epochs.
         """
         self.max_epochs = max_epochs
 
     def check_early_stopping(self, val_loss, weights):
         """
-        Check if early stopping criterion is met (no improvement for 'patience' epochs).
+        Checking if early stopping criterion is met.
         """
         if val_loss < self.best_loss:
             self.best_loss = val_loss
@@ -47,7 +47,7 @@ class StopCriterion:
 
     def check_loss_plateau(self):
         """
-        Check if the loss plateau criterion is met.
+        Checking if the loss plateau criterion is met.
         """
         if len(self.train_losses) < self.loss_window:
             return False, None, None  # Not enough epochs to check
@@ -62,7 +62,7 @@ class StopCriterion:
 
     def check_max_epochs(self, current_epoch):
         """
-        Check if the maximum number of epochs is reached.
+        Checking if the maximum number of epochs is reached.
         """
         if self.max_epochs and current_epoch >= self.max_epochs:
             return True, 'Maximum epochs reached', None
@@ -70,16 +70,7 @@ class StopCriterion:
 
     def __call__(self, current_epoch, train_loss, val_loss, weights):
         """
-        Check all stopping criteria and return whether to stop training.
-
-        Args:
-            current_epoch (int): The current epoch number.
-            train_loss (float): The current training loss.
-            val_loss (float): The current validation loss.
-            weights (numpy array): The current model weights.
-
-        Returns:
-            (bool, str, numpy array): (stop_flag, stopping_reason, best_weights)
+        Checking all stopping criteria and return whether to stop training.
         """
         self.train_losses.append(train_loss)
         self.val_losses.append(val_loss)
