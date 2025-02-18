@@ -1,6 +1,7 @@
 import numpy as np
 from modules.Activation import Sigmoid
 from utils.StopCriterion import StopCriterion
+from modules.DropoutLayer import DropoutLayer
 
 class NeuralNetwork:
     def __init__(self, layers):
@@ -13,14 +14,14 @@ class NeuralNetwork:
         current_input = X
 
         for layer in self.layers:
-            Z_current = np.dot(layer.weights, current_input) + layer.biases
+            if isinstance(layer, DropoutLayer):
+                Z_current = current_input
+                A_current = layer.forward(Z_current)
+            else:
+                Z_current = np.dot(layer.weights, current_input) + layer.biases
+                A_current = layer.activation.forward(Z_current)
+
             Z.append(Z_current)
-            A_current = layer.activation.forward(Z_current)
-
-            if A_current.shape[0] != layer.weights.shape[0]:
-                raise ValueError(
-                    f"Layer mismatch: A_current shape {A_current.shape} does not match expected {layer.weights.shape[0]}.")
-
             A.append(A_current)
             current_input = A_current
 
@@ -39,6 +40,10 @@ class NeuralNetwork:
         for l in range(L - 1, -1, -1):
             input_data = A[l] if l > 0 else X
 
+            if isinstance(self.layers[l], DropoutLayer):
+                d_output = self.layers[l].backward(d_output, Z[l], input_data, learning_rate)
+                continue
+
             if input_data.shape[0] != self.layers[l].weights.shape[1]:
                 input_data = input_data.T
 
@@ -56,10 +61,9 @@ class NeuralNetwork:
         train_losses, val_losses = [], []
         train_accuracies, val_accuracies = [], []
 
-        num_samples = X_train.shape[1]
+        num_samples = min(X_train.shape[1], y_train.shape[1])
 
         for epoch in range(epochs):
-            # Shuffling of training data
             permutation = np.random.permutation(num_samples)
             X_train, y_train = X_train[:, permutation], y_train[:, permutation]
 
@@ -67,7 +71,6 @@ class NeuralNetwork:
                 X_batch = X_train[:, i:i + batch_size]
                 y_batch = y_train[:, i:i + batch_size]
                 y_pred, A, O = self.forward(X_batch)
-
                 self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
 
             y_train_pred = self.forward(X_train)[0]
@@ -101,5 +104,3 @@ class NeuralNetwork:
         accuracy = np.mean(np.argmax(y_pred, axis=0) == np.argmax(y_test, axis=0)) * 100
         print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {accuracy:.2f}%")
         return test_loss, accuracy
-
-
