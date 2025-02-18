@@ -4,9 +4,19 @@ from utils.StopCriterion import StopCriterion
 from modules.DropoutLayer import DropoutLayer
 
 class NeuralNetwork:
-    def __init__(self, layers):
+    def __init__(self, layers, task_type="classification"):
         self.layers = layers
+        self.task_type = task_type
         self.sigmoid = Sigmoid()
+
+    def loss(self, y_true, y_pred):
+        if self.task_type == "classification":
+            y_pred = np.clip(y_pred, 1e-12, 1.0)
+            return -np.mean(y_true * np.log(y_pred))
+        elif self.task_type == "regression":
+            return np.mean((y_true - y_pred) ** 2)  # MSE for regression
+        else:
+            raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
 
     def forward(self, X):
         A = [X]
@@ -26,10 +36,6 @@ class NeuralNetwork:
             current_input = A_current
 
         return A[-1], A, Z
-
-    def loss(self, y_true, y_pred):
-        y_pred = np.clip(y_pred, 1e-12, 1.0)
-        return -np.mean(y_true * np.log(y_pred))
 
     def backward(self, X, y_true, y_pred, A, Z, learning_rate, lambda_reg=0.01):
         """Computing gradients using backpropagation and updating weights with learning rate."""
@@ -53,15 +59,13 @@ class NeuralNetwork:
             d_output = self.layers[l].backward(d_output, Z[l], input_data, learning_rate)
 
     def train(self, X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=10):
-        """Training the neural network with early stopping and loss plateau detection."""
         stop_criterion = StopCriterion(criteria=['early_stopping', 'loss_plateau', 'max_epochs'], patience=30,
                                        loss_window=30)
         stop_criterion.set_max_epochs(epochs)
 
         train_losses, val_losses = [], []
-        train_accuracies, val_accuracies = [], []
-
-        num_samples = min(X_train.shape[1], y_train.shape[1])
+        train_metrics, val_metrics = [], []
+        num_samples = X_train.shape[1]
 
         for epoch in range(epochs):
             permutation = np.random.permutation(num_samples)
@@ -79,16 +83,20 @@ class NeuralNetwork:
             train_loss = self.loss(y_train, y_train_pred)
             val_loss = self.loss(y_val, y_val_pred)
 
-            train_accuracy = np.mean(np.argmax(y_train_pred, axis=0) == np.argmax(y_train, axis=0)) * 100
-            val_accuracy = np.mean(np.argmax(y_val_pred, axis=0) == np.argmax(y_val, axis=0)) * 100
+            if self.task_type == "classification":
+                train_metric = np.mean(np.argmax(y_train_pred, axis=0) == np.argmax(y_train, axis=0)) * 100
+                val_metric = np.mean(np.argmax(y_val_pred, axis=0) == np.argmax(y_val, axis=0)) * 100
+            elif self.task_type == "regression":
+                train_metric = train_loss  # Using MSE as the metric for regression
+                val_metric = val_loss
 
             train_losses.append(train_loss)
             val_losses.append(val_loss)
-            train_accuracies.append(train_accuracy)
-            val_accuracies.append(val_accuracy)
+            train_metrics.append(train_metric)
+            val_metrics.append(val_metric)
 
             print(f"Epoch {epoch + 1}: Train Loss = {train_loss:.4f}, Val Loss = {val_loss:.4f}, "
-                  f"Train Acc = {train_accuracy:.2f}%, Val Acc = {val_accuracy:.2f}%")
+                  f"Train Metric = {train_metric:.2f}, Val Metric = {val_metric:.2f}")
 
             # Checking stopping criterion
             stop, reason, best_weights = stop_criterion(epoch, train_loss, val_loss, self.layers)
@@ -96,11 +104,15 @@ class NeuralNetwork:
                 print(f"\nTraining stopped at epoch {epoch + 1}: {reason}")
                 break
 
-        return train_losses, val_losses, train_accuracies, val_accuracies
+        return train_losses, val_losses, train_metrics, val_metrics
 
     def evaluate(self, X_test, y_test):
         y_pred = self.forward(X_test)[0]
         test_loss = self.loss(y_test, y_pred)
-        accuracy = np.mean(np.argmax(y_pred, axis=0) == np.argmax(y_test, axis=0)) * 100
-        print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {accuracy:.2f}%")
-        return test_loss, accuracy
+        if self.task_type == "classification":
+            accuracy = np.mean(np.argmax(y_pred, axis=0) == np.argmax(y_test, axis=0)) * 100
+            print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {accuracy:.2f}%")
+            return test_loss, accuracy
+        elif self.task_type == "regression":
+            print(f"Test Loss (MSE): {test_loss:.4f}")
+            return test_loss
