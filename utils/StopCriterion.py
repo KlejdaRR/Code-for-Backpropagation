@@ -1,7 +1,7 @@
 import numpy as np
 
 class StopCriterion:
-    def __init__(self, criteria, patience=20, loss_window=20):
+    def __init__(self, criteria, patience=30, loss_window=30):
         """Initializing the stopping criterion."""
         self.criteria = criteria
         self.max_epochs = None

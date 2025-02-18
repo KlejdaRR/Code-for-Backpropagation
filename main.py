@@ -8,7 +8,7 @@ from modules.DropoutLayer import DropoutLayer
 
 def plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name):
     """Plotting training loss and accuracy with epochs on the x-axis."""
-    epochs = range(1, len(train_losses) + 1)
+    epochs = np.arange(1, len(train_losses) + 1)
 
     fig, ax1 = plt.subplots(2, 1, figsize=(10, 8))
 
@@ -133,13 +133,13 @@ def main():
     best_acc = 0
     best_params = {}
 
-    for lr in [0.01, 0.001, 0.0001]:
+    for lr in [0.01, 0.001, 0.0005]:
         for batch_size in [32, 64, 128]:
             print(f"Training with learning_rate={lr}, batch_size={batch_size}")
 
             nn = create_model(input_size, num_classes)
             train_losses, val_losses, train_accuracies, val_accuracies = nn.train(
-                X_train, y_train, X_val, y_val, epochs=100, learning_rate=lr, batch_size=batch_size, patience=20
+                X_train, y_train, X_val, y_val, epochs=100, learning_rate=lr, batch_size=batch_size, patience=30
             )
 
             final_acc = val_accuracies[-1]
