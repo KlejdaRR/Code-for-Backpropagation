@@ -1,22 +1,32 @@
 import argparse
 import matplotlib.pyplot as plt
+import numpy as np
 from utils.DatasetLoader import DatasetLoader
 from NeuralNetwork import NeuralNetwork
 from modules.DenseLayer import DenseLayer
 
+import matplotlib.pyplot as plt
 
 def plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name):
-    """Plots training loss and accuracy."""
+    """Plots training loss and accuracy with epochs on the x-axis."""
+    epochs = range(1, len(train_losses) + 1)
+
     fig, ax1 = plt.subplots(2, 1, figsize=(10, 8))
 
-    ax1[0].plot(train_losses, label='Training Loss', color='blue')
-    ax1[0].plot(val_losses, label='Validation Loss', color='orange')
+    # Plot training and validation loss
+    ax1[0].plot(epochs, train_losses, label='Training Loss', color='blue')
+    ax1[0].plot(epochs, val_losses, label='Validation Loss', color='orange')
     ax1[0].set_title(f"Training vs Validation Loss ({dataset_name.upper()})")
+    ax1[0].set_xlabel('Epochs')
+    ax1[0].set_ylabel('Loss')
     ax1[0].legend()
 
-    ax1[1].plot(train_accuracies, label='Training Accuracy', color='green')
-    ax1[1].plot(val_accuracies, label='Validation Accuracy', color='red')
+    # Plot training and validation accuracy
+    ax1[1].plot(epochs, train_accuracies, label='Training Accuracy', color='green')
+    ax1[1].plot(epochs, val_accuracies, label='Validation Accuracy', color='red')
     ax1[1].set_title(f"Training vs Validation Accuracy ({dataset_name.upper()})")
+    ax1[1].set_xlabel('Epochs')
+    ax1[1].set_ylabel('Accuracy')
     ax1[1].legend()
 
     plt.tight_layout()
@@ -65,11 +75,15 @@ if __name__ == "__main__":
     else:
         raise ValueError("Invalid dataset option. Use 'mnist', 'cifar10', or 'custom' with --custom_path.")
 
+    num_classes = y_train.shape[1] if y_train.ndim == 2 else len(np.unique(y_train))
+
+    print(f"Number of output classes detected: {num_classes}")
+
     nn = NeuralNetwork([
         DenseLayer(input_size, 512, activation="relu", initialization="he"),
         DenseLayer(512, 256, activation="relu", initialization="he"),
         DenseLayer(256, 128, activation="relu", initialization="he"),
-        DenseLayer(128, 10, activation="softmax", initialization="xavier")
+        DenseLayer(128, num_classes, activation="softmax", initialization="xavier")
     ])
 
     if args.dataset == "cifar10":
@@ -114,5 +128,4 @@ if __name__ == "__main__":
     print(f"\nBest Accuracy: {best_acc:.2f}% with {best_params}")
 
     plot_results(train_losses, val_losses, train_accuracies, val_accuracies, args.dataset)
-
     nn.evaluate(X_test, y_test)
