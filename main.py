@@ -5,6 +5,7 @@ from utils.DatasetLoader import DatasetLoader
 from NeuralNetwork import NeuralNetwork
 from modules.DenseLayer import DenseLayer
 from modules.DropoutLayer import DropoutLayer
+import os
 
 def plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name):
     """Plotting training loss and accuracy with epochs on the x-axis."""
@@ -68,6 +69,9 @@ def reshape_data(X_train, X_val, X_test, dataset_type):
         X_train = X_train.reshape(X_train.shape[0], -1).T
         X_val = X_val.reshape(X_val.shape[0], -1).T
         X_test = X_test.reshape(X_test.shape[0], -1).T
+    elif dataset_type == "wine_quality":
+        # Transpose the data to (num_features, num_samples)
+        X_train, X_val, X_test = X_train.T, X_val.T, X_test.T
     elif dataset_type == "custom":
         if X_train.ndim == 2:
             X_train, X_val, X_test = X_train.T, X_val.T, X_test.T
@@ -77,7 +81,8 @@ def reshape_data(X_train, X_val, X_test, dataset_type):
             X_test = X_test.reshape(X_test.shape[0], -1).T
         else:
             raise ValueError(
-                "Unsupported custom dataset shape. Ensure it is structured as (samples, features) or images.")
+                "Unsupported custom dataset shape. Ensure it is structured as (samples, features) or images."
+            )
     else:
         # Default: MNIST or any dataset that is already (samples, features)
         X_train, X_val, X_test = X_train.T, X_val.T, X_test.T
@@ -88,69 +93,112 @@ def get_input_size(X_train, dataset_type):
     """Returning the input size based on the dataset type."""
     if dataset_type == "mnist":
         return 784  # MNIST images are 28x28 pixels (flattened to 784)
-
     elif dataset_type == "cifar10":
         return 32 * 32 * 3  # CIFAR-10 images are 32x32 pixels with 3 color channels (3072)
-
+    elif dataset_type == "wine_quality":
+        return X_train.shape[1]  # Number of features (11)
     elif dataset_type == "custom":
         return X_train.shape[1]  # Using the number of features from the custom dataset
-
     else:
-        raise ValueError("Invalid dataset option. Use 'mnist', 'cifar10', or 'custom' with --custom_path.")
+        raise ValueError("Invalid dataset option. Use 'mnist', 'cifar10', 'wine_quality', or 'custom' with --custom_path.")
 
-def create_model(input_size, num_classes):
+def create_model(input_size, num_classes, task_type="classification"):
     """Creating and returns a neural network model."""
+    if task_type == "classification":
+        output_activation = "softmax"
+    elif task_type == "regression":
+        output_activation = "linear"
+    else:
+        raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
+
     return NeuralNetwork([
         DenseLayer(input_size, 256, activation="relu", initialization="he"),
-        DropoutLayer(0.5),  # Add dropout with 50% probability
+        DropoutLayer(0.5),
         DenseLayer(256, 128, activation="relu", initialization="he"),
-        DropoutLayer(0.5),  # Add dropout with 50% probability
-        DenseLayer(128, num_classes, activation="softmax", initialization="xavier")
-    ])
+        DropoutLayer(0.5),
+        DenseLayer(128, num_classes, activation=output_activation, initialization="xavier")
+    ], task_type=task_type)
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Train a neural network on MNIST, CIFAR-10, or a custom dataset.")
-    parser.add_argument("--dataset", type=str, default="mnist", help="Choose dataset (mnist, cifar10, custom).")
+    parser = argparse.ArgumentParser(
+        description="Train a neural network on MNIST, CIFAR-10, Wine Quality, or a custom dataset.")
+    parser.add_argument("--dataset", type=str, default="mnist",
+                        help="Choose dataset (mnist, cifar10, wine_quality, custom).")
     parser.add_argument("--custom_path", type=str, default=None, help="Path to custom dataset file (CSV or NPZ).")
+    parser.add_argument("--task_type", type=str, default="classification",
+                        help="Choose task type (classification, regression).")
     args = parser.parse_args()
 
     # Loading dataset
-    X_train, y_train, X_val, y_val, X_test, y_test = load_dataset(args.dataset, args.custom_path)
+    if args.dataset == "wine_quality":
+        wine_folder = "wine+quality"
+        if not os.path.exists(wine_folder):
+            raise FileNotFoundError(f"The folder '{wine_folder}' does not exist.")
+
+        # Check if the dataset files exist
+        red_wine_path = os.path.join(wine_folder, "winequality-red.csv")
+        white_wine_path = os.path.join(wine_folder, "winequality-white.csv")
+
+        if not os.path.exists(red_wine_path) and not os.path.exists(white_wine_path):
+            raise FileNotFoundError(
+                f"No Wine Quality dataset files found in '{wine_folder}'. "
+                f"Please ensure 'winequality-red.csv' or 'winequality-white.csv' exists in the folder."
+            )
+
+        args.custom_path = wine_folder
+
+    if args.dataset == "wine_quality":
+        dataset_loader = DatasetLoader(dataset_type="wine_quality", custom_path=args.custom_path)
+        X_train, y_train, X_val, y_val, X_test, y_test = dataset_loader.load_data()
+    else:
+        X_train, y_train, X_val, y_val, X_test, y_test = load_dataset(args.dataset, args.custom_path)
 
     print(f"Dataset: {args.dataset.upper()}")
     print(f"Train Set: {X_train.shape}, {y_train.shape}")
     print(f"Validation Set: {X_val.shape}, {y_val.shape}")
     print(f"Test Set: {X_test.shape}, {y_test.shape}")
-    input_size = get_input_size(X_train, args.dataset)
 
+    # Reshape data if necessary
     X_train, X_val, X_test = reshape_data(X_train, X_val, X_test, args.dataset)
 
-    num_classes = y_train.shape[1] if y_train.ndim == 2 else len(np.unique(y_train))
-    if y_train.shape[0] != num_classes:
-        y_train, y_val, y_test = y_train.T, y_val.T, y_test.T
+    # Determine input size and number of classes
+    input_size = X_train.shape[0]  # Number of features (11 for Wine Quality)
+    if args.task_type == "classification":
+        num_classes = y_train.shape[0] if y_train.ndim == 2 else len(np.unique(y_train))
+    elif args.task_type == "regression":
+        num_classes = 1  # For regression, the output is a single value
+        # Reshape y_train, y_val, and y_test to (1, num_samples) for regression
+        y_train = y_train.reshape(1, -1)
+        y_val = y_val.reshape(1, -1)
+        y_test = y_test.reshape(1, -1)
+    else:
+        raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
 
+    # Train the model
     best_model = None
-    best_acc = 0
+    best_metric = 0 if args.task_type == "classification" else float('inf')
     best_params = {}
 
-    for lr in [0.01, 0.001, 0.0005]:
+    for lr in [0.01, 0.001, 0.005, 0.0005]:
         for batch_size in [32, 64, 128]:
             print(f"Training with learning_rate={lr}, batch_size={batch_size}")
 
-            nn = create_model(input_size, num_classes)
-            train_losses, val_losses, train_accuracies, val_accuracies = nn.train(
+            nn = create_model(input_size, num_classes, task_type=args.task_type)
+            train_losses, val_losses, train_metrics, val_metrics = nn.train(
                 X_train, y_train, X_val, y_val, epochs=100, learning_rate=lr, batch_size=batch_size, patience=30
             )
 
-            final_acc = val_accuracies[-1]
-            print(f"Final Accuracy: {final_acc:.2f}% with lr={lr}, batch_size={batch_size}")
+            final_metric = val_metrics[-1]
+            print(f"Final Metric: {final_metric:.2f} with lr={lr}, batch_size={batch_size}")
 
-            if final_acc > best_acc:
-                best_acc = final_acc
+            if (args.task_type == "classification" and final_metric > best_metric) or \
+                    (args.task_type == "regression" and final_metric < best_metric):
+                best_metric = final_metric
                 best_params = {'learning_rate': lr, 'batch_size': batch_size}
                 best_model = nn
 
-    # Retraining the best model on the combined training and validation sets
+    # Retrain the best model on the combined training and validation sets
     print("\nRetraining the best model on the combined training and validation sets...")
     X_combined = np.concatenate((X_train, X_val), axis=1)
     y_combined = np.concatenate((y_train, y_val), axis=1)
@@ -158,12 +206,12 @@ def main():
     best_model.train(X_combined, y_combined, X_test, y_test, epochs=100, learning_rate=best_params['learning_rate'],
                      batch_size=best_params['batch_size'], patience=20)
 
-    # Evaluating the best model on the test set
+    # Evaluate the best model on the test set
     print("\nEvaluating the best model on the test set...")
     best_model.evaluate(X_test, y_test)
 
-    print(f"\nBest Accuracy: {best_acc:.2f}% with {best_params}")
-    plot_results(train_losses, val_losses, train_accuracies, val_accuracies, args.dataset)
+    print(f"\nBest Metric: {best_metric:.2f} with {best_params}")
+    plot_results(train_losses, val_losses, train_metrics, val_metrics, args.dataset)
 
 if __name__ == "__main__":
     main()

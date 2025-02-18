@@ -11,15 +11,56 @@ class DatasetLoader:
         self.custom_path = custom_path  # Path for custom datasets
 
     def load_data(self, train_file=None, test_file=None, normalize=True, one_hot=True, num_classes=10):
-        """Loads dataset based on type (MNIST, CIFAR-10, or custom dataset)."""
+        """Loads dataset based on type (MNIST, CIFAR-10, Wine Quality, or custom dataset)."""
         if self.dataset_type == "mnist":
             return self._load_mnist_csv(train_file, test_file, normalize, one_hot, num_classes)
         elif self.dataset_type == "cifar10":
             return self._load_cifar10(train_file, normalize, one_hot, num_classes)
+        elif self.dataset_type == "wine_quality":
+            return self._load_wine_quality(normalize)
         elif self.dataset_type == "custom":
             return self._load_custom_dataset(normalize, one_hot, num_classes)
         else:
             raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
+
+    def _load_wine_quality(self, normalize=True):
+        """Loads the Wine Quality dataset from the wine+quality folder."""
+        import pandas as pd
+
+        red_wine_path = os.path.join("wine+quality", "winequality-red.csv")
+        white_wine_path = os.path.join("wine+quality", "winequality-white.csv")
+
+        if not os.path.exists(red_wine_path) and not os.path.exists(white_wine_path):
+            raise FileNotFoundError(
+                f"No Wine Quality dataset files found in 'wine+quality' folder. "
+                f"Please ensure 'winequality-red.csv' or 'winequality-white.csv' exists in the folder."
+            )
+
+        # Load the dataset (red or white wine)
+        if os.path.exists(red_wine_path):
+            print("Loading red wine dataset...")
+            data = pd.read_csv(red_wine_path, delimiter=';')
+        else:
+            print("Loading white wine dataset...")
+            data = pd.read_csv(white_wine_path, delimiter=';')
+
+        print(f"Loaded Wine Quality dataset with shape: {data.shape}")
+
+        X = data.iloc[:, :-1].values
+        y = data.iloc[:, -1].values
+
+        if normalize:
+            X = (X - X.mean(axis=0)) / X.std(axis=0)
+
+        split = int(0.8 * X.shape[0])
+        X_train, y_train = X[:split], y[:split]
+        X_test, y_test = X[split:], y[split:]
+
+        val_size = int(X_train.shape[0] * 0.1)
+        X_val, y_val = X_train[:val_size], y_train[:val_size]
+        X_train, y_train = X_train[val_size:], y_train[val_size:]
+
+        return X_train, y_train, X_val, y_val, X_test, y_test
 
     def _load_mnist_csv(self, train_file, test_file, normalize, one_hot, num_classes):
         """Loading MNIST dataset from CSV files."""

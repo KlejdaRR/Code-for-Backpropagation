@@ -31,3 +31,10 @@ class Softmax(Activation):
 
     def derivative(self, X):
         return np.ones_like(X)
+
+class Linear(Activation):
+    def forward(self, X):
+        return X
+
+    def derivative(self, X):
+        return np.ones_like(X)
