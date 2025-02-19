@@ -33,8 +33,11 @@ class DenseLayer(BaseLayer):
         self.input = X
         self.pre_activation = np.dot(self.weights, X) + self.biases
         if self.batch_norm:
-            self.pre_activation = (self.pre_activation - np.mean(self.pre_activation)) / np.std(self.pre_activation)
+            batch_mean = np.mean(self.pre_activation, axis=1, keepdims=True)
+            batch_std = np.std(self.pre_activation, axis=1, keepdims=True) + 1e-8
+            self.pre_activation = (self.pre_activation - batch_mean) / batch_std
             self.pre_activation = self.gamma * self.pre_activation + self.beta
+
         self.output = self.activation.forward(self.pre_activation)
         return self.output
 
@@ -46,7 +49,10 @@ class DenseLayer(BaseLayer):
         if Z.shape[0] != self.weights.shape[0]:
             Z = Z.T
 
-        d_output *= self.activation.derivative(Z)
+        if isinstance(self.activation, Softmax):
+            d_output = d_output
+        else:
+            d_output *= self.activation.derivative(Z)
 
         if input_data.shape[0] != self.weights.shape[1]:
             input_data = input_data.T
