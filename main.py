@@ -97,19 +97,15 @@ def get_input_size(X_train, dataset_type):
         raise ValueError("Invalid dataset option. Use 'mnist', 'cifar10', 'wine_quality', or 'custom' with --custom_path.")
 
 def create_model(input_size, num_classes, task_type="classification"):
-    """Creating and returns a neural network model."""
-    if task_type == "classification":
-        output_activation = "softmax"
-    elif task_type == "regression":
-        output_activation = "linear"
-    else:
-        raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
+    output_activation = "softmax" if task_type == "classification" else "linear"
 
     return NeuralNetwork([
-        DenseLayer(input_size, 256, activation="relu", initialization="he"),
-        DropoutLayer(0.5),
+        DenseLayer(input_size, 512, activation="relu", initialization="he"),
+        DropoutLayer(0.3),
+        DenseLayer(512, 256, activation="relu", initialization="he"),
+        DropoutLayer(0.3),
         DenseLayer(256, 128, activation="relu", initialization="he"),
-        DropoutLayer(0.5),
+        DropoutLayer(0.3),
         DenseLayer(128, num_classes, activation=output_activation, initialization="xavier")
     ], task_type=task_type)
 

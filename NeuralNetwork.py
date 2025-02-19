@@ -12,11 +12,12 @@ class NeuralNetwork:
     def loss(self, y_true, y_pred):
         if self.task_type == "classification":
             y_pred = np.clip(y_pred, 1e-12, 1.0)
-            return -np.mean(y_true * np.log(y_pred))
+            if y_true.ndim == 1 or y_true.shape[0] == 1:
+                return -np.mean(np.log(y_pred[np.arange(len(y_true)), y_true.astype(int)]))
+            else:
+                return -np.mean(y_true * np.log(y_pred))
         elif self.task_type == "regression":
-            return np.mean((y_true - y_pred) ** 2)  # MSE for regression
-        else:
-            raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
+            return np.mean((y_true - y_pred) ** 2)  # MSE
 
     def forward(self, X):
         A = [X]

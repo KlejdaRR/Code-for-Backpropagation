@@ -30,7 +30,8 @@ class Softmax(Activation):
         return exp_X / np.sum(exp_X, axis=0, keepdims=True)
 
     def derivative(self, X):
-        return np.ones_like(X)
+        S = self.forward(X)
+        return S * (1 - S)
 
 class Linear(Activation):
     def forward(self, X):
