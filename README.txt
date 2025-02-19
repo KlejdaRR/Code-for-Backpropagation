@@ -13,6 +13,7 @@ Code-for-Backpropagation/
 │   │── mnist_train.csv       # MNIST training dataset
 │── cifar-10-python/          # CIFAR-10 dataset files
 │── wine+quality/             # Wine Quality dataset files
+│── custom_dataset.csv/       # Custom Dataset
 │── modules/                  # Core modules for the neural network
 │   │── Activation.py         # Activation functions (ReLU, Sigmoid, Softmax, Linear)
 │   │── BaseLayer.py          # Base class for layers
