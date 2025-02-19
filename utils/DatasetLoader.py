@@ -110,18 +110,18 @@ class DatasetLoader:
             X_train = X_train.astype("float32") / 255.0
             X_test = X_test.astype("float32") / 255.0
 
-        X_train = X_train.reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
-        X_test = X_test.reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1)
+        X_train = X_train.reshape(-1, 32, 32, 3)
+        X_test = X_test.reshape(-1, 32, 32, 3)
 
         if one_hot:
             y_train = self._one_hot_encode(y_train, num_classes)
             y_test = self._one_hot_encode(y_test, num_classes)
 
-        val_size = int(X_train.shape[0] * 0.1)
+        val_size = int(0.1 * X_train.shape[0])
         X_val, y_val = X_train[:val_size], y_train[:val_size]
         X_train, y_train = X_train[val_size:], y_train[val_size:]
 
-        return X_train, y_train, X_val, y_val, X_test, y_test
+        return X_train, y_train.T, X_val, y_val.T, X_test, y_test.T
 
     def _load_custom_dataset(self, normalize=True, one_hot=True, num_classes=10):
         """Loading a custom dataset from CSV or NumPy format."""
