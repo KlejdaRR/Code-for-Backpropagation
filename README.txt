@@ -44,6 +44,12 @@ Early stopping and loss plateau detection for efficient training.
 Run the training script with:
 ```
 python main.py --dataset <dataset_name> --task_type <task_type> --custom_path <path_to_custom_dataset>
+
+examples:
+python main.py --dataset mnist --task_type classification
+python main.py --dataset custom --custom_path custom_dataset.npz
+python main.py --dataset wine_quality --task_type regression
+python main.py --dataset cifar10 --task_type classification
 ```
 
 ## Dependencies
