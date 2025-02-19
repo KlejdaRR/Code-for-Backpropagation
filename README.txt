@@ -1,40 +1,49 @@
 # Neural Network Implementation
 
 ## Overview
-This project implements a multi-layer neural network using Object-Oriented Programming (OOP) principles in Python. It supports modular layers, training, and evaluation on synthetic datasets and can be extended to real-world datasets like MNIST.
+This repository contains a flexible and modular implementation of a neural network in Python.
+The network supports various activation functions, layer types, and training techniques such as dropout and batch normalization.
+It is designed to handle both classification and regression tasks and can be used with different datasets, including MNIST, CIFAR-10, Wine Quality, and custom datasets.
 
 ## Project Structure
 ```
 Code-for-Backpropagation/
-│── data/
-│   │── mnist_text.csv
-│   │── mnist_train.csv
-│── cifar-10-python/
-│── modules/
-│   │── Activation.py       # Activation functions (ReLU, Sigmoid, Softmax)
-│   │── BaseLayer.py        # Base class for layers
-│   │── DenseLayer.py       # Fully connected layer implementation
-│── utils/
-│   │── DatasetLoader.py    # Handles dataset loading (MNIST, CIFAR-10)
-│   │── StopCriterion.py    # Early stopping and loss plateau detection
-│── NeuralNetwork.py        # Neural network model
-│── main.py                 # Training and evaluation script
-│── README.txt              # Project documentation
+│── data/                     # Dataset files
+│   │── mnist_text.csv        # MNIST test dataset
+│   │── mnist_train.csv       # MNIST training dataset
+│── cifar-10-python/          # CIFAR-10 dataset files
+│── wine+quality/             # Wine Quality dataset files
+│── modules/                  # Core modules for the neural network
+│   │── Activation.py         # Activation functions (ReLU, Sigmoid, Softmax, Linear)
+│   │── BaseLayer.py          # Base class for layers
+│   │── DenseLayer.py         # Fully connected layer implementation
+│   │── DropoutLayer.py       # Dropout layer for regularization
+│── utils/                    # Utility modules
+│   │── DatasetLoader.py      # Handles dataset loading (MNIST, CIFAR-10, Wine Quality, custom)
+│   │── StopCriterion.py      # Early stopping and loss plateau detection
+│── NeuralNetwork.py          # Neural network model implementation
+│── main.py                   # Training and evaluation script
+│── README.md                 # Project documentation
 ```
 
 ## Features
-- Fully connected layers with configurable activation functions
-- Activation functions: ReLU, Sigmoid, Softmax
-- Dataset Loader for MNIST and CIFAR-10 datasets
-- Early stopping and loss plateau detection for optimized training
-- Forward and Backward Propagation with gradient descent and L2 regularization
-- Training and Evaluation with visualization of loss and accuracy
+- Modular Layers: Fully connected layers with configurable activation functions.
+- Activation Functions: ReLU, Sigmoid, Softmax, and Linear.
+- Dataset Loader: Supports MNIST, CIFAR-10, Wine Quality, and custom datasets.
+- Training Techniques:
+Batch normalization.
+Dropout for regularization.
+L2 regularization to prevent overfitting.
+- Optimization:
+Gradient descent with configurable learning rate.
+Early stopping and loss plateau detection for efficient training.
+- Task Types: Supports both classification and regression tasks.
+- Visualization: Plots training and validation loss/accuracy over epochs.
 
 ## Usage
 Run the training script with:
 ```
-python main.py --dataset mnist
-python main.py --dataset cifar10
+python main.py --dataset <dataset_name> --task_type <task_type> --custom_path <path_to_custom_dataset>
 ```
 
 ## Dependencies
