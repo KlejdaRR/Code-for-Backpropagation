@@ -89,9 +89,20 @@ class NeuralNetwork:
             if self.task_type == "classification":
                 train_metric = np.mean(np.argmax(y_train_pred, axis=0) == np.argmax(y_train, axis=0)) * 100
                 val_metric = np.mean(np.argmax(y_val_pred, axis=0) == np.argmax(y_val, axis=0)) * 100
+                metric_name = "Accuracy (%)"
             elif self.task_type == "regression":
-                train_metric = train_loss  # Using MSE as the metric for regression
-                val_metric = val_loss
+                mse_train = train_loss  # MSE
+                mae_train = np.mean(np.abs(y_train - y_train_pred))  # MAE
+                rmse_train = np.sqrt(mse_train)  # RMSE
+
+                mse_val = val_loss
+                mae_val = np.mean(np.abs(y_val - y_val_pred))
+                rmse_val = np.sqrt(mse_val)
+
+                # Using MSE as the primary metric for regression
+                train_metric = mse_train
+                val_metric = mse_val
+                metric_name = "MSE"
 
             train_losses.append(train_loss)
             val_losses.append(val_loss)
@@ -99,7 +110,7 @@ class NeuralNetwork:
             val_metrics.append(val_metric)
 
             print(f"Epoch {epoch + 1}: Train Loss = {train_loss:.4f}, Val Loss = {val_loss:.4f}, "
-                  f"Train Metric = {train_metric:.2f}, Val Metric = {val_metric:.2f}")
+                  f"Train {metric_name} = {train_metric:.4f}, Val {metric_name} = {val_metric:.4f}")
 
             # Checking stopping criterion
             stop, reason, best_weights = stop_criterion(epoch, train_loss, val_loss, self.layers)
@@ -112,10 +123,18 @@ class NeuralNetwork:
     def evaluate(self, X_test, y_test):
         y_pred = self.forward(X_test)[0]
         test_loss = self.loss(y_test, y_pred)
+
         if self.task_type == "classification":
             accuracy = np.mean(np.argmax(y_pred, axis=0) == np.argmax(y_test, axis=0)) * 100
             print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {accuracy:.2f}%")
             return test_loss, accuracy
         elif self.task_type == "regression":
-            print(f"Test Loss (MSE): {test_loss:.4f}")
-            return test_loss
+            mse = test_loss
+            mae = np.mean(np.abs(y_test - y_pred))
+            rmse = np.sqrt(mse)
+
+            print(f"Test MSE: {mse:.4f}")
+            print(f"Test MAE: {mae:.4f}")
+            print(f"Test RMSE: {rmse:.4f}")
+
+            return mse, mae, rmse

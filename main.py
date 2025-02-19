@@ -7,27 +7,35 @@ from modules.DenseLayer import DenseLayer
 from modules.DropoutLayer import DropoutLayer
 import os
 
-def plot_results(train_losses, val_losses, train_accuracies, val_accuracies, dataset_name):
-    """Plotting training loss and accuracy with epochs on the x-axis."""
+def plot_results(train_losses, val_losses, train_metrics, val_metrics, dataset_name, task_type):
+    """Plot training and validation loss/metric over epochs based on task type."""
     epochs = np.arange(1, len(train_losses) + 1)
 
-    fig, ax1 = plt.subplots(2, 1, figsize=(10, 8))
+    fig, ax = plt.subplots(2, 1, figsize=(10, 8))
 
-    # Plotting training and validation loss
-    ax1[0].plot(epochs, train_losses, label='Training Loss', color='blue')
-    ax1[0].plot(epochs, val_losses, label='Validation Loss', color='orange')
-    ax1[0].set_title(f"Training vs Validation Loss ({dataset_name.upper()})")
-    ax1[0].set_xlabel('Epochs')
-    ax1[0].set_ylabel('Loss')
-    ax1[0].legend()
+    # Plot training and validation loss
+    ax[0].plot(epochs, train_losses, label='Training Loss', color='blue')
+    ax[0].plot(epochs, val_losses, label='Validation Loss', color='orange')
+    ax[0].set_title(f"Training vs Validation Loss ({dataset_name.upper()})")
+    ax[0].set_xlabel('Epochs')
+    ax[0].set_ylabel('Loss (MSE for regression, Cross-Entropy for classification)')
+    ax[0].legend()
 
-    # Plotting training and validation accuracy
-    ax1[1].plot(epochs, train_accuracies, label='Training Accuracy', color='green')
-    ax1[1].plot(epochs, val_accuracies, label='Validation Accuracy', color='red')
-    ax1[1].set_title(f"Training vs Validation Accuracy ({dataset_name.upper()})")
-    ax1[1].set_xlabel('Epochs')
-    ax1[1].set_ylabel('Accuracy')
-    ax1[1].legend()
+    if task_type == "classification":
+        # Plot accuracy for classification
+        ax[1].plot(epochs, train_metrics, label='Training Accuracy', color='green')
+        ax[1].plot(epochs, val_metrics, label='Validation Accuracy', color='red')
+        ax[1].set_title(f"Training vs Validation Accuracy ({dataset_name.upper()})")
+        ax[1].set_ylabel('Accuracy (%)')
+    elif task_type == "regression":
+        # Plot MSE for regression
+        ax[1].plot(epochs, train_metrics, label='Training MSE', color='green')
+        ax[1].plot(epochs, val_metrics, label='Validation MSE', color='red')
+        ax[1].set_title(f"Training vs Validation MSE ({dataset_name.upper()})")
+        ax[1].set_ylabel('Mean Squared Error (MSE)')
+
+    ax[1].set_xlabel('Epochs')
+    ax[1].legend()
 
     plt.tight_layout()
     plt.show()
@@ -199,7 +207,7 @@ def main():
     best_model.evaluate(X_test, y_test)
 
     print(f"\nBest Metric: {best_metric:.2f} with {best_params}")
-    plot_results(train_losses, val_losses, train_metrics, val_metrics, args.dataset)
+    plot_results(train_losses, val_losses, train_metrics, val_metrics, args.dataset, task_type="regression")
 
 if __name__ == "__main__":
     main()
