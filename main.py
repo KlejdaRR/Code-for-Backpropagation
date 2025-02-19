@@ -207,7 +207,7 @@ def main():
     best_model.evaluate(X_test, y_test)
 
     print(f"\nBest Metric: {best_metric:.2f} with {best_params}")
-    plot_results(train_losses, val_losses, train_metrics, val_metrics, args.dataset, task_type="regression")
+    plot_results(train_losses, val_losses, train_metrics, val_metrics, args.dataset, task_type = args.task_type)
 
 if __name__ == "__main__":
     main()
