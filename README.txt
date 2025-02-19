@@ -60,5 +60,5 @@ python main.py --dataset cifar10 --task_type classification
 
 ## Authors
 Klejda Rrapaj: k.rrapaj@student.unisi.it
-Sildi Ricky: s.ricku@student.unisi.it
+Sildi Ricku: s.ricku@student.unisi.it
 
