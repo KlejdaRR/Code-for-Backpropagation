@@ -66,10 +66,12 @@ class NeuralNetwork:
         train_losses, val_losses = [], []
         train_metrics, val_metrics = [], []
         num_samples = X_train.shape[1]
+        print(f"X_train shape: {X_train.shape}, y_train shape: {y_train.shape}")
 
         for epoch in range(epochs):
             permutation = np.random.permutation(num_samples)
-            X_train, y_train = X_train[:, permutation], y_train[:, permutation]
+            X_train = X_train[:, permutation]
+            y_train = y_train[:, permutation]
 
             for i in range(0, num_samples, batch_size):
                 X_batch = X_train[:, i:i + batch_size]

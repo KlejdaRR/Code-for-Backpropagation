@@ -63,14 +63,11 @@ def load_dataset(dataset_type, custom_path=None):
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 def reshape_data(X_train, X_val, X_test, dataset_type):
-    """Reshaping the data based on the dataset type."""
     if dataset_type == "cifar10":
-        # CIFAR-10 images need to be flattened to (3072, num_samples)
         X_train = X_train.reshape(X_train.shape[0], -1).T
         X_val = X_val.reshape(X_val.shape[0], -1).T
         X_test = X_test.reshape(X_test.shape[0], -1).T
     elif dataset_type == "wine_quality":
-        # Transpose the data to (num_features, num_samples)
         X_train, X_val, X_test = X_train.T, X_val.T, X_test.T
     elif dataset_type == "custom":
         if X_train.ndim == 2:
@@ -80,11 +77,8 @@ def reshape_data(X_train, X_val, X_test, dataset_type):
             X_val = X_val.reshape(X_val.shape[0], -1).T
             X_test = X_test.reshape(X_test.shape[0], -1).T
         else:
-            raise ValueError(
-                "Unsupported custom dataset shape. Ensure it is structured as (samples, features) or images."
-            )
+            raise ValueError("Unsupported custom dataset shape.")
     else:
-        # Default: MNIST or any dataset that is already (samples, features)
         X_train, X_val, X_test = X_train.T, X_val.T, X_test.T
 
     return X_train, X_val, X_test
@@ -96,7 +90,7 @@ def get_input_size(X_train, dataset_type):
     elif dataset_type == "cifar10":
         return 32 * 32 * 3  # CIFAR-10 images are 32x32 pixels with 3 color channels (3072)
     elif dataset_type == "wine_quality":
-        return X_train.shape[1]  # Number of features (11)
+        return X_train.shape[1]
     elif dataset_type == "custom":
         return X_train.shape[1]  # Using the number of features from the custom dataset
     else:
@@ -136,7 +130,6 @@ def main():
         if not os.path.exists(wine_folder):
             raise FileNotFoundError(f"The folder '{wine_folder}' does not exist.")
 
-        # Check if the dataset files exist
         red_wine_path = os.path.join(wine_folder, "winequality-red.csv")
         white_wine_path = os.path.join(wine_folder, "winequality-white.csv")
 
@@ -159,23 +152,22 @@ def main():
     print(f"Validation Set: {X_val.shape}, {y_val.shape}")
     print(f"Test Set: {X_test.shape}, {y_test.shape}")
 
-    # Reshape data if necessary
+    # Reshaping data if necessary
     X_train, X_val, X_test = reshape_data(X_train, X_val, X_test, args.dataset)
 
-    # Determine input size and number of classes
-    input_size = X_train.shape[0]  # Number of features (11 for Wine Quality)
+    input_size = X_train.shape[0]
     if args.task_type == "classification":
         num_classes = y_train.shape[0] if y_train.ndim == 2 else len(np.unique(y_train))
     elif args.task_type == "regression":
         num_classes = 1  # For regression, the output is a single value
-        # Reshape y_train, y_val, and y_test to (1, num_samples) for regression
+        # Reshaping of y_train, y_val, and y_test to (1, num_samples) for regression
         y_train = y_train.reshape(1, -1)
         y_val = y_val.reshape(1, -1)
         y_test = y_test.reshape(1, -1)
     else:
         raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
 
-    # Train the model
+    # training the model
     best_model = None
     best_metric = 0 if args.task_type == "classification" else float('inf')
     best_params = {}
@@ -198,7 +190,7 @@ def main():
                 best_params = {'learning_rate': lr, 'batch_size': batch_size}
                 best_model = nn
 
-    # Retrain the best model on the combined training and validation sets
+    # Retraining the best model on the combined training and validation sets
     print("\nRetraining the best model on the combined training and validation sets...")
     X_combined = np.concatenate((X_train, X_val), axis=1)
     y_combined = np.concatenate((y_train, y_val), axis=1)
@@ -206,7 +198,7 @@ def main():
     best_model.train(X_combined, y_combined, X_test, y_test, epochs=100, learning_rate=best_params['learning_rate'],
                      batch_size=best_params['batch_size'], patience=20)
 
-    # Evaluate the best model on the test set
+    # Evaluating the best model on the test set
     print("\nEvaluating the best model on the test set...")
     best_model.evaluate(X_test, y_test)
 

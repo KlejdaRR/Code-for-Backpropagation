@@ -11,7 +11,7 @@ class DatasetLoader:
         self.custom_path = custom_path  # Path for custom datasets
 
     def load_data(self, train_file=None, test_file=None, normalize=True, one_hot=True, num_classes=10):
-        """Loads dataset based on type (MNIST, CIFAR-10, Wine Quality, or custom dataset)."""
+        """Loading dataset based on type (MNIST, CIFAR-10, Wine Quality, or custom dataset)."""
         if self.dataset_type == "mnist":
             return self._load_mnist_csv(train_file, test_file, normalize, one_hot, num_classes)
         elif self.dataset_type == "cifar10":
@@ -24,8 +24,7 @@ class DatasetLoader:
             raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
 
     def _load_wine_quality(self, normalize=True):
-        """Loads the Wine Quality dataset from the wine+quality folder."""
-        import pandas as pd
+        """Loading the Wine Quality dataset from the wine+quality folder for the regression task experiment."""
 
         red_wine_path = os.path.join("wine+quality", "winequality-red.csv")
         white_wine_path = os.path.join("wine+quality", "winequality-white.csv")
@@ -36,7 +35,6 @@ class DatasetLoader:
                 f"Please ensure 'winequality-red.csv' or 'winequality-white.csv' exists in the folder."
             )
 
-        # Load the dataset (red or white wine)
         if os.path.exists(red_wine_path):
             print("Loading red wine dataset...")
             data = pd.read_csv(red_wine_path, delimiter=';')
@@ -137,6 +135,13 @@ class DatasetLoader:
 
             y = y.astype(int)
 
+            if y.ndim == 2 and y.shape[1] == num_classes:
+                one_hot = False  # Skip one-hot encoding
+            elif one_hot:
+                y = self._one_hot_encode(y, num_classes)
+            else:
+                y = y.reshape(1, -1)
+
         elif self.custom_path.endswith(".npz"):
             print("Loading custom NumPy dataset...")
             data = np.load(self.custom_path)
@@ -146,12 +151,20 @@ class DatasetLoader:
             y_train = y_train.astype(int)
             y_test = y_test.astype(int)
 
+            if y_train.ndim == 2 and y_train.shape[1] == num_classes:
+                one_hot = False
+            elif one_hot:
+                y_train = self._one_hot_encode(y_train, num_classes)
+                y_test = self._one_hot_encode(y_test, num_classes)
+            else:
+                y_train = y_train.reshape(1, -1)
+                y_test = y_test.reshape(1, -1)
+
             return self._prepare_data(X_train, y_train, X_test, y_test, normalize, one_hot, num_classes)
 
         else:
             raise ValueError("Unsupported file format. Use .csv or .npz.")
 
-        # Split 80% training, 20% test
         split = int(0.8 * X.shape[0])
         X_train, y_train = X[:split], y[:split]
         X_test, y_test = X[split:], y[split:]
@@ -164,18 +177,28 @@ class DatasetLoader:
             X_train = X_train.astype("float32") / 255.0
             X_test = X_test.astype("float32") / 255.0
 
-        if one_hot:
+        if y_train.ndim == 2 and y_train.shape[1] == num_classes:
+            one_hot = False
+        elif one_hot:
             y_train = self._one_hot_encode(y_train, num_classes)
             y_test = self._one_hot_encode(y_test, num_classes)
 
+        if y_train.ndim == 2 and y_train.shape[0] != num_classes:
+            y_train = y_train.T
+        if y_test.ndim == 2 and y_test.shape[0] != num_classes:
+            y_test = y_test.T
+
         val_size = int(X_train.shape[0] * 0.1)
-        X_val, y_val = X_train[:val_size], y_train[:val_size]
-        X_train, y_train = X_train[val_size:], y_train[val_size:]
+        X_val, y_val = X_train[:val_size], y_train[:, :val_size]
+        X_train, y_train = X_train[val_size:], y_train[:, val_size:]
 
         return X_train, y_train, X_val, y_val, X_test, y_test
 
     def _one_hot_encode(self, labels, num_classes):
         """Converting labels to one-hot encoding."""
+        if labels.ndim != 1:
+            raise ValueError("Labels must be a 1D array of class indices.")
+
         labels = labels.astype(int)
         one_hot = np.zeros((labels.shape[0], num_classes))
         one_hot[np.arange(labels.shape[0]), labels] = 1
