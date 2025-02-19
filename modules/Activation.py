@@ -31,7 +31,7 @@ class Softmax(Activation):
 
     def derivative(self, X):
         S = self.forward(X)
-        return np.diagflat(S) - np.outer(S, S)
+        return S * (1 - S)
 
 class Linear(Activation):
     def forward(self, X):
