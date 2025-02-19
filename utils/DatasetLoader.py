@@ -73,12 +73,12 @@ class DatasetLoader:
             X_test = X_test.astype("float32") / 255.0
 
         if one_hot:
-            y_train = self._one_hot_encode(y_train, num_classes)
-            y_test = self._one_hot_encode(y_test, num_classes)
+            y_train = self._one_hot_encode(y_train, num_classes).T
+            y_test = self._one_hot_encode(y_test, num_classes).T
 
         val_size = int(X_train.shape[0] * 0.1)
-        X_val, y_val = X_train[:val_size], y_train[:val_size]
-        X_train, y_train = X_train[val_size:], y_train[val_size:]
+        X_val, y_val = X_train[:val_size], y_train[:, :val_size]
+        X_train, y_train = X_train[val_size:], y_train[:, val_size:]
 
         return X_train, y_train, X_val, y_val, X_test, y_test
 
