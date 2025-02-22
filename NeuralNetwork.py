@@ -71,8 +71,8 @@ class NeuralNetwork:
 
         for epoch in range(epochs):
             permutation = np.random.permutation(num_samples)
-            X_train = X_train[:, permutation]
-            y_train = y_train[:, permutation]
+            X_train = X_train[:, permutation] # Shuffling of data by using permutation to prevent overfitting
+            y_train = y_train[:, permutation] # Shuffling of data by using permutation to prevent overfitting
 
             for i in range(0, num_samples, batch_size):
                 X_batch = X_train[:, i:i + batch_size]
