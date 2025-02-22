@@ -59,7 +59,7 @@ class NeuralNetwork:
 
             d_output = self.layers[l].backward(d_output, Z[l], input_data, learning_rate)
 
-    def train(self, X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=10):
+    def train(self, X_train, y_train, X_val, y_val, epochs=100, learning_rate=0.001, batch_size=128, patience=30):
         stop_criterion = StopCriterion(criteria=['early_stopping', 'loss_plateau', 'max_epochs'], patience=30,
                                        loss_window=30)
         stop_criterion.set_max_epochs(epochs)
