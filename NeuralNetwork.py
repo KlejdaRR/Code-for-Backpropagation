@@ -87,6 +87,10 @@ class NeuralNetwork:
             train_loss = self.loss(y_train, y_train_pred)
             val_loss = self.loss(y_val, y_val_pred)
 
+            train_metric = 0
+            val_metric = 0
+            metric_name = ""
+
             if self.task_type == "classification":
                 train_metric = np.mean(np.argmax(y_train_pred, axis=0) == np.argmax(y_train, axis=0)) * 100
                 val_metric = np.mean(np.argmax(y_val_pred, axis=0) == np.argmax(y_val, axis=0)) * 100
