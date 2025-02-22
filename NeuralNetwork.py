@@ -93,12 +93,7 @@ class NeuralNetwork:
                 metric_name = "Accuracy (%)"
             elif self.task_type == "regression":
                 mse_train = train_loss  # MSE
-                mae_train = np.mean(np.abs(y_train - y_train_pred))  # MAE
-                rmse_train = np.sqrt(mse_train)  # RMSE
-
                 mse_val = val_loss
-                mae_val = np.mean(np.abs(y_val - y_val_pred))
-                rmse_val = np.sqrt(mse_val)
 
                 # Using MSE as the primary metric for regression
                 train_metric = mse_train
