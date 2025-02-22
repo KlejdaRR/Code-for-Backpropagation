@@ -104,7 +104,7 @@ def get_input_size(X_train, dataset_type):
     else:
         raise ValueError("Invalid dataset option. Use 'mnist', 'cifar10', 'wine_quality', or 'custom' with --custom_path.")
 
-def create_model(input_size, num_classes, task_type="classification"):
+def create_model(input_size, num_classes, task_type):
     output_activation = "softmax" if task_type == "classification" else "linear"
 
     return NeuralNetwork([
