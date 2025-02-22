@@ -76,8 +76,8 @@ class NeuralNetwork:
             y_train = y_train[:, permutation] # Shuffling of data by using permutation to prevent overfitting
 
             for i in range(0, num_samples, batch_size):
-                X_batch = X_train[:, i:i + batch_size]
-                y_batch = y_train[:, i:i + batch_size]
+                X_batch = X_train[:, i:i + batch_size] # selecting a batch of input features to improve training efficiency
+                y_batch = y_train[:, i:i + batch_size] # selecting the correspondent batch labels
                 y_pred, A, O = self.forward(X_batch)
                 self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
 
