@@ -35,6 +35,7 @@ class NeuralNetwork:
             Z.append(Z_current)
             A.append(A_current)
             current_input = A_current
+            # A[-1] is the output of the final layer
 
         return A[-1], A, Z
 
