@@ -72,24 +72,18 @@ class NeuralNetwork:
 
         for epoch in range(epochs):
             permutation = np.random.permutation(num_samples)
-            X_train = X_train[:, permutation]  # Shuffling of data by using permutation to prevent overfitting
-            y_train = y_train[:, permutation]  # Shuffling of data by using permutation to prevent overfitting
+            X_train = X_train[:, permutation] # Shuffling of data by using permutation to prevent overfitting
+            y_train = y_train[:, permutation] # Shuffling of data by using permutation to prevent overfitting
 
             for i in range(0, num_samples, batch_size):
-                X_batch = X_train[:, i:i + batch_size]  # selecting a batch of input features
-                y_batch = y_train[:, i:i + batch_size]  # selecting the correspondent batch labels
-                y_pred, A, O = self.forward(X_batch)  # Forward pass to get predictions
-
-                # Calculating the loss
-                loss = self.loss(y_batch, y_pred)
-
-                # Backward pass (using loss gradients for updates)
+                X_batch = X_train[:, i:i + batch_size] # selecting a batch of input features to improve training efficiency
+                y_batch = y_train[:, i:i + batch_size] # selecting the correspondent batch labels
+                y_pred, A, O = self.forward(X_batch)
                 self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
 
             y_train_pred = self.forward(X_train)[0]
             y_val_pred = self.forward(X_val)[0]
 
-            # Computing the loss for both train and validation sets after the backward pass
             train_loss = self.loss(y_train, y_train_pred)
             val_loss = self.loss(y_val, y_val_pred)
 
@@ -118,7 +112,7 @@ class NeuralNetwork:
             print(f"Epoch {epoch + 1}: Train Loss = {train_loss:.4f}, Val Loss = {val_loss:.4f}, "
                   f"Train {metric_name} = {train_metric:.4f}, Val {metric_name} = {val_metric:.4f}")
 
-            # Checking stopping criterion (early stopping, loss plateau, max epochs)
+            # Checking stopping criterion
             stop, reason, best_weights = stop_criterion(epoch, train_loss, val_loss, self.layers)
             if stop:
                 print(f"\nTraining stopped at epoch {epoch + 1}: {reason}")
