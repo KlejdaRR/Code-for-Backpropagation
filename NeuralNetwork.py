@@ -43,7 +43,7 @@ class NeuralNetwork:
         """Computing gradients using backpropagation and updating weights with learning rate."""
         L = len(self.layers)
 
-        # Computing the gradient of the loss based on the task type
+        # Computing the gradient of the loss with respect to the output based on the task type 
         if self.task_type == "classification":
             d_loss = y_pred - y_true  # Gradient of cross-entropy loss
         elif self.task_type == "regression":

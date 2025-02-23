@@ -49,6 +49,7 @@ class DenseLayer(BaseLayer):
         if Z.shape[0] != self.weights.shape[0]:
             Z = Z.T
 
+        # Computing gradient of the loss with respect to the pre-activation (Z)
         if isinstance(self.activation, Softmax):
             d_output = d_output
         else:
@@ -62,12 +63,19 @@ class DenseLayer(BaseLayer):
                 f"Layer mismatch: input_data {input_data.shape} does not match expected input size {self.weights.shape[1]}"
             )
 
+        # Computing gradient of the loss with respect to the weights
         d_weights = np.dot(d_output, input_data.T) / input_data.shape[1]
+
+        # Computing gradient of the loss with respect to the biases
         d_biases = np.mean(d_output, axis=1, keepdims=True)
 
         #L2 Regularization
         d_weights += lambda_reg * self.weights
+
+        # Computing gradient of the loss with respect to the input (for previous layers)
         d_input = np.dot(self.weights.T, d_output)
+
+        # Updating weights and biases
         self.weights -= learning_rate * d_weights
         self.biases -= learning_rate * d_biases
 
