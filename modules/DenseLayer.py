@@ -54,7 +54,6 @@ class DenseLayer(BaseLayer):
 
         # Ensuring the gradient of the loss (d_output) and pre-activation output (Z)
         # have the correct shapes for backpropagation
-
         if d_output.shape[0] != self.weights.shape[0]:
             d_output = d_output.T
 
