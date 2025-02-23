@@ -51,6 +51,7 @@ class NeuralNetwork:
         else:
             raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
 
+        # gradient of the loss w.r.t output
         d_output = d_loss
 
         for l in range(L - 1, -1, -1):
@@ -60,9 +61,11 @@ class NeuralNetwork:
                 d_output = self.layers[l].backward(d_output, Z[l], input_data, learning_rate)
                 continue
 
+            # checking if the number of rows in input_data matches the number of columns in the layer’s weights
             if input_data.shape[0] != self.layers[l].weights.shape[1]:
                 input_data = input_data.T
 
+            # checking if the number of rows in d_output matches the number of rows in the layer’s weights
             if d_output.shape[0] != self.layers[l].weights.shape[0]:
                 d_output = d_output.T
 
