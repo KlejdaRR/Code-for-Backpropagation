@@ -39,7 +39,7 @@ class NeuralNetwork:
 
         return A[-1], A, Z
 
-    def backward(self, X, y_true, y_pred, A, Z, learning_rate, lambda_reg=0.01):
+    def backward(self, X, y_true, y_pred, A, Z, learning_rate, lambda_reg=0.001):
         """Computing gradients using backpropagation and updating weights with learning rate."""
         L = len(self.layers)
         d_loss = y_pred - y_true
