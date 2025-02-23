@@ -11,7 +11,7 @@ class NeuralNetwork:
 
     def loss(self, y_true, y_pred):
         if self.task_type == "classification":
-            y_pred = np.clip(y_pred, 1e-12, 1.0)
+            y_pred = np.clip(y_pred, 1e-12, 1.0) # To avoid numerical instability, the predicted probabilities are clipped to a small range
             if y_true.ndim == 1 or y_true.shape[0] == 1:
                 return -np.mean(np.log(y_pred[np.arange(len(y_true)), y_true.astype(int)]))
             else:
@@ -42,7 +42,15 @@ class NeuralNetwork:
     def backward(self, X, y_true, y_pred, A, Z, learning_rate, lambda_reg=0.001):
         """Computing gradients using backpropagation and updating weights with learning rate."""
         L = len(self.layers)
-        d_loss = y_pred - y_true
+
+        # Computing the gradient of the loss based on the task type
+        if self.task_type == "classification":
+            d_loss = y_pred - y_true  # Gradient of cross-entropy loss
+        elif self.task_type == "regression":
+            d_loss = 2 * (y_pred - y_true)  # Gradient of MSE loss
+        else:
+            raise ValueError("Unsupported task type. Use 'classification' or 'regression'.")
+
         d_output = d_loss
 
         for l in range(L - 1, -1, -1):
@@ -84,6 +92,7 @@ class NeuralNetwork:
             y_train_pred = self.forward(X_train)[0]
             y_val_pred = self.forward(X_val)[0]
 
+            # calculation of the loss for the entire training set and validation set
             train_loss = self.loss(y_train, y_train_pred)
             val_loss = self.loss(y_val, y_val_pred)
 
@@ -122,6 +131,7 @@ class NeuralNetwork:
 
     def evaluate(self, X_test, y_test):
         y_pred = self.forward(X_test)[0]
+        # after training, the loss is computed for the test set to evaluate the model's performance
         test_loss = self.loss(y_test, y_pred)
 
         if self.task_type == "classification":
