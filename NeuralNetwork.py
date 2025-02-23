@@ -86,12 +86,15 @@ class NeuralNetwork:
             X_train = X_train[:, permutation] # Shuffling of data by using permutation to prevent overfitting
             y_train = y_train[:, permutation] # Shuffling of data by using permutation to prevent overfitting
 
+            # Performing forward and backward propagation for each mini-batch
             for i in range(0, num_samples, batch_size):
                 X_batch = X_train[:, i:i + batch_size] # selecting a batch of input features to improve training efficiency
                 y_batch = y_train[:, i:i + batch_size] # selecting the correspondent batch labels
                 y_pred, A, O = self.forward(X_batch)
                 self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
 
+            # After updating the model's weights using mini-batches,
+            # we evaluate the model on the entire training set and validation set
             y_train_pred = self.forward(X_train)[0] # we get the y_pred from the forward method
             y_val_pred = self.forward(X_val)[0]
 
