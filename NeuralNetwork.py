@@ -43,7 +43,7 @@ class NeuralNetwork:
         """Computing gradients using backpropagation and updating weights with learning rate."""
         L = len(self.layers)
 
-        # Computing the gradient of the loss with respect to the output based on the task type 
+        # Computing the gradient of the loss with respect to the output based on the task type
         if self.task_type == "classification":
             d_loss = y_pred - y_true  # Gradient of cross-entropy loss
         elif self.task_type == "regression":
@@ -89,10 +89,11 @@ class NeuralNetwork:
                 y_pred, A, O = self.forward(X_batch)
                 self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
 
-            y_train_pred = self.forward(X_train)[0]
+            y_train_pred = self.forward(X_train)[0] # we get the y_pred from the forward method
             y_val_pred = self.forward(X_val)[0]
 
             # calculation of the loss for the entire training set and validation set
+            # in order to use it for the stopping criterion to evaluate and to evaluate the model's performance
             train_loss = self.loss(y_train, y_train_pred)
             val_loss = self.loss(y_val, y_val_pred)
 
