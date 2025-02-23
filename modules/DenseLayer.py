@@ -16,6 +16,7 @@ class DenseLayer(BaseLayer):
 
         self.activation = activation_classes[activation]()
 
+        # Initializing weights based on the chosen method
         if initialization == "xavier":
             self.weights = np.random.randn(output_size, input_size) * np.sqrt(1 / input_size)
         elif initialization == "he":
@@ -23,7 +24,9 @@ class DenseLayer(BaseLayer):
         else:
             self.weights = np.random.randn(output_size, input_size) * 0.01
 
+        # biases are initialized to zero
         self.biases = np.zeros((output_size, 1))
+
         self.batch_norm = batch_norm
         if self.batch_norm:
             self.gamma = np.ones((output_size, 1))  # Scale parameter
@@ -31,25 +34,34 @@ class DenseLayer(BaseLayer):
 
     def forward(self, X):
         self.input = X
+
+        # Computing the pre-activation output: Z = weights * X + biases
         self.pre_activation = np.dot(self.weights, X) + self.biases
+
+        # If batch_norm is enabled, we normalize the pre-activation output
         if self.batch_norm:
             batch_mean = np.mean(self.pre_activation, axis=1, keepdims=True)
             batch_std = np.std(self.pre_activation, axis=1, keepdims=True) + 1e-8
             self.pre_activation = (self.pre_activation - batch_mean) / batch_std
             self.pre_activation = self.gamma * self.pre_activation + self.beta
 
+        # Application of the chosen the activation function to the pre-activation output
         self.output = self.activation.forward(self.pre_activation)
         return self.output
 
     def backward(self, d_output, Z, input_data, learning_rate, lambda_reg=0.001):
         """Computes gradients using backpropagation and updates weights with L2 regularization."""
+
+        # Ensuring the gradient of the loss (d_output) and pre-activation output (Z)
+        # have the correct shapes for backpropagation
+
         if d_output.shape[0] != self.weights.shape[0]:
             d_output = d_output.T
 
         if Z.shape[0] != self.weights.shape[0]:
             Z = Z.T
 
-        # Computing gradient of the loss with respect to the pre-activation (Z)
+        # If the activation is not softmax we multiply the gradient by the derivative of the activation function.
         if isinstance(self.activation, Softmax):
             d_output = d_output
         else:
