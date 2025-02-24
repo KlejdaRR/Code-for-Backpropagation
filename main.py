@@ -130,22 +130,6 @@ def main():
 
     # Loading dataset
     if args.dataset == "wine_quality":
-        wine_folder = "wine+quality"
-        if not os.path.exists(wine_folder):
-            raise FileNotFoundError(f"The folder '{wine_folder}' does not exist.")
-
-        red_wine_path = os.path.join(wine_folder, "winequality-red.csv")
-        white_wine_path = os.path.join(wine_folder, "winequality-white.csv")
-
-        if not os.path.exists(red_wine_path) and not os.path.exists(white_wine_path):
-            raise FileNotFoundError(
-                f"No Wine Quality dataset files found in '{wine_folder}'. "
-                f"Please ensure 'winequality-red.csv' or 'winequality-white.csv' exists in the folder."
-            )
-
-        args.custom_path = wine_folder
-
-    if args.dataset == "wine_quality":
         dataset_loader = DatasetLoader(dataset_type="wine_quality", custom_path=args.custom_path)
         X_train, y_train, X_val, y_val, X_test, y_test = dataset_loader.load_data()
     else:
