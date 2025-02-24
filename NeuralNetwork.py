@@ -78,6 +78,8 @@ class NeuralNetwork:
 
         train_losses, val_losses = [], []
         train_metrics, val_metrics = [], []
+
+        # retrieving the individual data points
         num_samples = X_train.shape[1]
         print(f"X_train shape: {X_train.shape}, y_train shape: {y_train.shape}")
 
@@ -99,7 +101,7 @@ class NeuralNetwork:
             y_val_pred = self.forward(X_val)[0]
 
             # calculation of the loss for the entire training set and validation set
-            # in order to use it for the stopping criterion to evaluate and to evaluate the model's performance
+            # in order to use it for the stopping criterion and to evaluate the model's performance
             train_loss = self.loss(y_train, y_train_pred)
             val_loss = self.loss(y_val, y_val_pred)
 
