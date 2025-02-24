@@ -184,7 +184,7 @@ def main():
     y_combined = np.concatenate((y_train, y_val), axis=1)
 
     best_model.train(X_combined, y_combined, X_test, y_test, epochs=100, learning_rate=best_params['learning_rate'],
-                     batch_size=best_params['batch_size'], patience=20)
+                     batch_size=best_params['batch_size'], patience=30)
 
     # Evaluating the best model on the test set
     print("\nEvaluating the best model on the test set...")
