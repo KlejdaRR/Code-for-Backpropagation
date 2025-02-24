@@ -57,6 +57,8 @@ class NeuralNetwork:
         # gradient of the loss w.r.t output
         d_output = d_loss
 
+        # iterating through the layers (from the last layer to the first)
+        # to compute the gradients of the loss with respect to the weights and biases of each layer
         for l in range(L - 1, -1, -1):
             input_data = A[l] if l > 0 else X
 
