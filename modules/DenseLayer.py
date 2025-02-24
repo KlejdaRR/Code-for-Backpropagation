@@ -3,7 +3,7 @@ from modules.Activation import ReLU, Softmax, Sigmoid, Linear
 import numpy as np
 
 class DenseLayer(BaseLayer):
-    def __init__(self, input_size, output_size, activation="relu", initialization="he", batch_norm=True):
+    def __init__(self, input_size, output_size, activation, initialization, batch_norm=True):
         activation_classes = {
             "relu": ReLU,
             "sigmoid": Sigmoid,
