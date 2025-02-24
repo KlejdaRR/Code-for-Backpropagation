@@ -128,7 +128,15 @@ def main():
                         help="Choose task type (classification, regression).")
     args = parser.parse_args()
 
-    # Loading dataset
+    # Loading datasets
+
+    # (X_train, y_train) serves to train the neural network model: minimize loss function and train model's parameters
+
+    # (X_val, y_val) serves to evaluate the model on the validation dataset,
+    # also the StopCriterion class uses the validation loss to determine when to stop training
+
+    # (X_test, y_test) serves to evaluate the model on the test dataset using the evaluate method in the NeuralNetwork class
+
     if args.dataset == "wine_quality":
         dataset_loader = DatasetLoader(dataset_type="wine_quality", custom_path=args.custom_path)
         X_train, y_train, X_val, y_val, X_test, y_test = dataset_loader.load_data()
