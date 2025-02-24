@@ -29,11 +29,11 @@ class NeuralNetwork:
 
         for layer in self.layers:
             if isinstance(layer, DropoutLayer):
-                Z_current = current_input # holds output of the weighted sums plus bias
-                A_current = layer.forward(Z_current) # holds output of the activation function being applied to the Z_current
+                Z_current = current_input
+                A_current = layer.forward(Z_current)
             else:
-                Z_current = np.dot(layer.weights, current_input) + layer.biases
-                A_current = layer.activation.forward(Z_current)
+                Z_current = np.dot(layer.weights, current_input) + layer.biases # holds output of the weighted sums plus bias
+                A_current = layer.activation.forward(Z_current) # holds output of the activation function being applied to the Z_current
 
             Z.append(Z_current)
             A.append(A_current)
