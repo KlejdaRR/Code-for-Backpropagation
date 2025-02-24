@@ -92,7 +92,11 @@ class NeuralNetwork:
             for i in range(0, num_samples, batch_size):
                 X_batch = X_train[:, i:i + batch_size] # selecting a batch of input features to improve training efficiency
                 y_batch = y_train[:, i:i + batch_size] # selecting the correspondent batch labels
+
+                # forward pass
                 y_pred, A, O = self.forward(X_batch)
+
+                # backward pass
                 self.backward(X_batch, y_batch, y_pred, A, O, learning_rate)
 
             # After updating the model's weights using mini-batches,
