@@ -14,5 +14,7 @@ class DropoutLayer:
             return X * self.mask
         return X  # No dropout during inference/testing
 
+    # During backpropagation, the gradient of the loss with respect to the input (d_output) is multiplied by the mask
+    # This way gradients are only propagated through the neurons that were kept during the forward pass
     def backward(self, d_output, Z, input_data, learning_rate):
         return d_output * self.mask
