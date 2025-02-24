@@ -12,9 +12,12 @@ class NeuralNetwork:
     def loss(self, y_true, y_pred):
         if self.task_type == "classification":
             y_pred = np.clip(y_pred, 1e-12, 1.0) # To avoid numerical instability, the predicted probabilities are clipped to a small range
+
             if y_true.ndim == 1 or y_true.shape[0] == 1:
+                # for 1D Array or Single Row the true label y_true is 1 only for the true class and 0 for all other classes
                 return -np.mean(np.log(y_pred[np.arange(len(y_true)), y_true.astype(int)]))
             else:
+                # using regular cross entropy formula
                 return -np.mean(y_true * np.log(y_pred))
         elif self.task_type == "regression":
             return np.mean((y_true - y_pred) ** 2)  # MSE
