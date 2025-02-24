@@ -66,6 +66,7 @@ class DenseLayer(BaseLayer):
         else:
             d_output *= self.activation.derivative(Z)
 
+        # input_data = input to the current layer (output of the previous layer or the original input for the first layer)
         if input_data.shape[0] != self.weights.shape[1]:
             input_data = input_data.T
 
@@ -74,7 +75,9 @@ class DenseLayer(BaseLayer):
                 f"Layer mismatch: input_data {input_data.shape} does not match expected input size {self.weights.shape[1]}"
             )
 
-        # Computing gradient of the loss with respect to the weights
+        # Computing gradient of the loss with respect to the weights using the chain rule
+        # The dot product of d_output and input_data.T gives the contribution of each weight to the loss
+        # The result is averaged over the number of samples in the batch (input_data.shape[1])
         d_weights = np.dot(d_output, input_data.T) / input_data.shape[1]
 
         # Computing gradient of the loss with respect to the biases
