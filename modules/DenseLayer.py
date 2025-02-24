@@ -86,7 +86,8 @@ class DenseLayer(BaseLayer):
         #L2 Regularization
         d_weights += lambda_reg * self.weights
 
-        # Computing gradient of the loss with respect to the input (for previous layers)
+        # Computing gradient of the loss with respect to the input
+        # because d_input becomes the gradient of the loss with respect to previous layer's output
         d_input = np.dot(self.weights.T, d_output)
 
         # Updating weights and biases
