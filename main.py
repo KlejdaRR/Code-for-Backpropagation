@@ -166,8 +166,7 @@ def main():
 
             nn = create_model(input_size, num_classes, task_type=args.task_type)
             train_losses, val_losses, train_metrics, val_metrics = nn.train(
-                X_train, y_train, X_val, y_val, epochs=100, learning_rate=lr, batch_size=batch_size, patience=30
-            )
+                X_train, y_train, X_val, y_val, epochs=100, learning_rate=lr, batch_size=batch_size)
 
             final_metric = val_metrics[-1]
             print(f"Final Metric: {final_metric:.2f} with lr={lr}, batch_size={batch_size}")
@@ -184,7 +183,7 @@ def main():
     y_combined = np.concatenate((y_train, y_val), axis=1)
 
     best_model.train(X_combined, y_combined, X_test, y_test, epochs=100, learning_rate=best_params['learning_rate'],
-                     batch_size=best_params['batch_size'], patience=30)
+                     batch_size=best_params['batch_size'])
 
     # Evaluating the best model on the test set
     print("\nEvaluating the best model on the test set...")
