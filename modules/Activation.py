@@ -23,8 +23,11 @@ class Sigmoid(Activation):
         sig = self.forward(X)
         return sig * (1 - sig)
 
+#  Softmax is a bit different from other activation functions (like ReLU or Sigmoid)
+#  because it operates on a vector of inputs and produces a vector of outputs (probabilities)
 class Softmax(Activation):
     def forward(self, X):
+        # Compute the maximum value of X along the columns (for each sample in the batch)
         X_max = np.max(X, axis=0, keepdims=True)
         exp_X = np.exp(X - X_max)
         return exp_X / np.sum(exp_X, axis=0, keepdims=True)
