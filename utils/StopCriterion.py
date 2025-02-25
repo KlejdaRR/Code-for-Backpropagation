@@ -53,6 +53,7 @@ class StopCriterion:
         mean_loss = np.mean(recent_losses)
 
         # calculating the standard deviation of the values in recent_losses
+        # standard deviation quantifies the spread of these values around the mean
         std_loss = np.std(recent_losses)
 
         # If the standard deviation is very small compared to the mean (so less than 1% of the mean), the loss has plateaued
