@@ -80,6 +80,7 @@ def reshape_data(X_train, X_val, X_test, dataset_type):
     elif dataset_type == "custom":
         if X_train.ndim == 2:
             X_train, X_val, X_test = X_train.T, X_val.T, X_test.T
+        # checking if we have image dataset
         elif X_train.ndim == 4:
             X_train = X_train.reshape(X_train.shape[0], -1).T
             X_val = X_val.reshape(X_val.shape[0], -1).T
