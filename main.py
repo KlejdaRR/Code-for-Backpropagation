@@ -151,6 +151,7 @@ def main():
     # Reshaping data if necessary
     X_train, X_val, X_test = reshape_data(X_train, X_val, X_test, args.dataset)
 
+    # Determining the number of classes (num_classes) based on the task type
     input_size = X_train.shape[0]
     if args.task_type == "classification":
         num_classes = y_train.shape[0] if y_train.ndim == 2 else len(np.unique(y_train))
