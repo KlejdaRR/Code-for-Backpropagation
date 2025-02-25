@@ -9,12 +9,17 @@ class Activation:
         raise NotImplementedError
 
 class ReLU(Activation):
+    #  sets all negative values in X to 0 and leaves positive values unchanged
     def forward(self, X):
         return np.maximum(0, X)
 
+    # Computes the derivative of ReLU:
+    # ReLU' = 1 if X > 0, otherwise 0
+    # This is implemented as (X > 0).astype(float), which returns a binary array where positive values are 1 and non-positive values are 0
     def derivative(self, X):
         return (X > 0).astype(float)
 
+# Sigmoid is an activation function that maps input values to a range between 0 and 1
 class Sigmoid(Activation):
     def forward(self, X):
         return 1 / (1 + np.exp(-X))
