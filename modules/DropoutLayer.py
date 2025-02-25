@@ -10,7 +10,7 @@ class DropoutLayer:
     # The mask is a binary matrix that determines which neurons are dropped out during training
     def forward(self, X, training=True):
         if training:
-            self.mask = np.random.binomial(1, 1 - self.rate, size=X.shape) / (1 - self.rate)
+            self.mask = np.random.binomial(1, 1 - self.rate, size=X.shape) / (1 - self.rate) # scaling
             return X * self.mask
         return X  # No dropout during inference/testing
 
