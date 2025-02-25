@@ -46,12 +46,16 @@ class StopCriterion:
         if len(self.val_losses) < self.loss_window:
             return False, None, None
 
-        # Computing the mean and standard deviation of the validation losses over the recent window
+        # extracting the last self.loss_window elements from self.val_losses
         recent_losses = self.val_losses[-self.loss_window:]
+
+        # calculating the mean of the values in recent_losses
         mean_loss = np.mean(recent_losses)
+
+        # calculating the standard deviation of the values in recent_losses
         std_loss = np.std(recent_losses)
 
-        # If the standard deviation is very small compared to the mean (less than 1% of the mean), the loss has plateaued
+        # If the standard deviation is very small compared to the mean (so less than 1% of the mean), the loss has plateaued
         if std_loss < (mean_loss * 0.01):
             return True, 'Loss plateau detected', None
         return False, None, None
