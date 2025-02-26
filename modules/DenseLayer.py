@@ -83,7 +83,7 @@ class DenseLayer(BaseLayer):
         # Computing gradient of the loss with respect to the biases
         d_biases = np.mean(d_output, axis=1, keepdims=True)
 
-        #L2 Regularization
+        #L2 Regularization/weight decay
         d_weights += lambda_reg * self.weights
 
         # Computing gradient of the loss with respect to the input
