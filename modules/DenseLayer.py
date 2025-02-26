@@ -39,10 +39,15 @@ class DenseLayer(BaseLayer):
         self.pre_activation = np.dot(self.weights, X) + self.biases
 
         # If batch_norm is enabled, we normalize the pre-activation output
+        # Batch normalization normalizes the outputs by adjusting them
+        # to have a mean of 0 and a standard deviation of 1 across each mini-batch of data
         if self.batch_norm:
             batch_mean = np.mean(self.pre_activation, axis=1, keepdims=True)
             batch_std = np.std(self.pre_activation, axis=1, keepdims=True) + 1e-8
             self.pre_activation = (self.pre_activation - batch_mean) / batch_std
+
+            # After normalization, the outputs are scaled by self.gamma (a learnable scaling parameter)
+            # and shifted by self.beta (a learnable shifting parameter)
             self.pre_activation = self.gamma * self.pre_activation + self.beta
 
         # Application of the chosen the activation function to the pre-activation output
